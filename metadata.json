@@ -1,6 +1,0 @@
-{
-  "name": "HoopHub — Find Your Street Ballers",
-  "description": "A premium replica of the Y68° street-basketball landing page featuring interactive 3D Three.js experience and smooth GSAP controls.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

@@ -238,7 +238,7 @@ export default function StatsSection() {
       </div>
 
       {/* RIGHT COLUMN: INTERACTIVE TABS WRAPPER (STATS ENGINE & TOURNAMENT BOARD) */}
-      <div className="w-full md:max-w-[55%] bg-gradient-to-bl from-zinc-900 to-neutral-950 border border-white/[0.08] rounded-[2rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-10 animate-fade opacity-0 translate-y-5">
+      <div className="w-full md:max-w-[55%] bg-neutral-900 border border-white/[0.08] rounded-[2rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.6)] z-10 animate-fade opacity-0 translate-y-5">
         
         {/* Toggle tabs headings */}
         <div className="flex items-center justify-between pb-4 border-b border-white/[0.06] mb-5">
@@ -356,7 +356,7 @@ export default function StatsSection() {
             </div>
 
             {/* Input game logs form section */}
-            <form onSubmit={handleRecordMatch} className="p-5 rounded-3xl bg-neutral-950 border border-white/[0.06] space-y-4 shadow-[0_10px_25px_rgba(0,0,0,0.4)]">
+            <form onSubmit={handleRecordMatch} className="p-6 rounded-3xl bg-[#141414] border border-white/[0.08] space-y-4 shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
               <span className="text-[9px] font-bold uppercase text-zinc-400 tracking-wider block">Record Match Game Stats</span>
               
               <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-2.5 items-end">
@@ -448,7 +448,7 @@ export default function StatsSection() {
                   <p className="text-[9.5px] text-zinc-600 italic">No games logged yet. Run pickups and record statistics!</p>
                 ) : (
                   matches.map(m => (
-                    <div key={m.id} className="p-2 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between text-[11px] hover:bg-white/[0.03] transition-all">
+                    <div key={m.id} className="p-3.5 rounded-xl bg-neutral-900 border border-white/5 flex items-center justify-between text-[11.5px] hover:bg-white/[0.05] hover:border-orange-500/20 hover:-translate-y-0.5 transition-all duration-300 shadow-sm">
                       <div className="flex items-center gap-3">
                         <span className={`w-5.5 h-5.5 rounded-full flex items-center justify-center text-[9px] font-extrabold ${m.result === 'W' ? 'bg-emerald-950/60 text-emerald-400' : 'bg-red-950/60 text-red-400'}`}>
                           {m.result}
@@ -485,7 +485,7 @@ export default function StatsSection() {
             {/* List Brackets */}
             <div className="space-y-3 max-h-[190px] overflow-y-auto pr-1">
               {tournaments.map(tour => (
-                <div key={tour.id} className="p-4 rounded-2xl bg-neutral-950 border border-white/[0.06] hover:border-zinc-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all shadow-[0_8px_20px_rgba(0,0,0,0.3)]">
+                <div key={tour.id} className="p-5 rounded-2xl bg-neutral-900 border border-white/[0.08] hover:border-orange-500/35 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all duration-300 hover:-translate-y-1 shadow-lg">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5">
                       <span className="text-[11.5px] font-bold text-white uppercase tracking-wide">{tour.name}</span>
@@ -516,7 +516,7 @@ export default function StatsSection() {
             </div>
 
             {/* Quick checkout bracket submission form */}
-            <form onSubmit={handleRegisterTournament} className="p-5 rounded-3xl bg-neutral-950 border border-white/[0.06] space-y-4 shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
+            <form onSubmit={handleRegisterTournament} className="p-6 rounded-3xl bg-[#141414] border border-white/[0.08] space-y-4 shadow-[0_15px_30px_rgba(0,0,0,0.6)]">
               <span className="text-[9px] font-bold uppercase text-orange-400 tracking-wider block">Join a Tournament Slam Bracket</span>
               
               <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_1fr_0.6fr] gap-3 items-end">

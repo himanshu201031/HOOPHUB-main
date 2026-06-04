@@ -418,7 +418,7 @@ export default function TournamentModule() {
             
             {/* ROUND 1: QUARTERS */}
             <div className="space-y-4">
-              <span className="px-3 py-2 bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/[0.08] text-[9.5px] text-zinc-300 font-bold uppercase tracking-widest block text-center rounded-xl shadow-lg">
+              <span className="px-3 py-2 bg-[#181818] border border-white/[0.08] text-[9.5px] text-zinc-300 font-bold uppercase tracking-widest block text-center rounded-xl shadow-lg">
                 Quarter Finals (QF)
               </span>
 
@@ -427,10 +427,10 @@ export default function TournamentModule() {
                   return (
                     <div 
                       key={m.id}
-                      className={`p-4 bg-neutral-950 border rounded-2xl space-y-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative transition-all duration-300 hover:-translate-y-1 ${
+                      className={`p-5 bg-neutral-900 border rounded-2xl space-y-3 shadow-[0_12px_30px_rgba(0,0,0,0.65)] relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_35px_rgba(0,0,0,0.8)] ${
                         m.completed 
-                          ? 'border-white/[0.06] hover:border-white/[0.15] hover:shadow-[0_12px_30px_rgba(255,255,255,0.02)]' 
-                          : 'border-orange-500/20 hover:border-orange-500/40 hover:shadow-[0_12px_30px_rgba(234,88,12,0.05)]'
+                          ? 'border-white/[0.08] hover:border-orange-500/30' 
+                          : 'border-orange-500/30 hover:border-orange-500/60'
                       }`}
                     >
                       <div className="flex items-center justify-between pb-1">
@@ -469,7 +469,7 @@ export default function TournamentModule() {
 
             {/* ROUND 2: SEMIS */}
             <div className="space-y-4">
-              <span className="px-3 py-2 bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/[0.08] text-[9.5px] text-zinc-300 font-bold uppercase tracking-widest block text-center rounded-xl shadow-lg">
+              <span className="px-3 py-2 bg-[#181818] border border-white/[0.08] text-[9.5px] text-zinc-300 font-bold uppercase tracking-widest block text-center rounded-xl shadow-lg">
                 Semi Finals (SF)
               </span>
 
@@ -478,10 +478,10 @@ export default function TournamentModule() {
                   return (
                     <div 
                       key={m.id}
-                      className={`p-4 bg-neutral-950 border rounded-2xl space-y-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative transition-all duration-300 hover:-translate-y-1 ${
+                      className={`p-5 bg-neutral-900 border rounded-2xl space-y-3 shadow-[0_12px_30px_rgba(0,0,0,0.65)] relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_35px_rgba(0,0,0,0.8)] ${
                         m.completed 
-                          ? 'border-white/[0.06] hover:border-white/[0.15] hover:shadow-[0_12px_30px_rgba(255,255,255,0.02)]' 
-                          : 'border-amber-500/20 hover:border-amber-500/40 hover:shadow-[0_12px_30px_rgba(217,119,6,0.05)]'
+                          ? 'border-white/[0.08] hover:border-amber-500/30' 
+                          : 'border-amber-500/30 hover:border-amber-500/60'
                       }`}
                     >
                       <div className="flex items-center justify-between pb-1">
@@ -524,7 +524,7 @@ export default function TournamentModule() {
 
             {/* ROUND 3: FINAL MATCH */}
             <div className="space-y-4">
-              <span className="px-3 py-2 bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/[0.08] text-[9.5px] text-zinc-300 font-bold uppercase tracking-widest block text-center rounded-xl shadow-lg">
+              <span className="px-3 py-2 bg-[#181818] border border-white/[0.08] text-[9.5px] text-zinc-300 font-bold uppercase tracking-widest block text-center rounded-xl shadow-lg">
                 Grand Finale
               </span>
 
@@ -534,8 +534,8 @@ export default function TournamentModule() {
                   return (
                     <div 
                       key={m.id}
-                      className={`p-5 bg-gradient-to-br from-neutral-950 to-[#120e09] border rounded-2xl space-y-3 shadow-[0_15px_40px_rgba(0,0,0,0.6)] relative transition-all duration-300 hover:-translate-y-1 ${
-                        m.completed ? 'border-yellow-500 shadow-yellow-500/5' : 'border-yellow-500/30'
+                      className={`p-5 bg-[#12100d] border rounded-2xl space-y-3 shadow-[0_20px_50px_rgba(0,0,0,0.85)] relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_25px_60px_rgba(250,204,21,0.06)] ${
+                        m.completed ? 'border-yellow-500 shadow-yellow-500/10' : 'border-yellow-500/40 hover:border-yellow-400'
                       }`}
                     >
                       <span className="absolute top-2 right-3 text-[8px] text-yellow-500 font-mono uppercase font-extrabold animate-pulse tracking-widest bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20">
@@ -629,7 +629,7 @@ export default function TournamentModule() {
             <span className="text-[9.5px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">REGISTERED SQUADS ({teams.length})</span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {teams.map((tm, idx) => (
-                <div key={idx} className="p-4 bg-neutral-950 border border-white/[0.06] hover:border-emerald-500/40 transition-all duration-300 hover:-translate-y-0.5 rounded-2xl flex flex-col justify-between text-xs space-y-3.5 shadow-xl">
+                <div key={idx} className="p-5 bg-neutral-900 border border-white/[0.08] hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1.5 rounded-2xl flex flex-col justify-between text-xs space-y-3.5 shadow-xl">
                   <div className="space-y-2 text-left">
                     <div className="flex items-center justify-between">
                       <h4 className="font-display text-white text-[13.5px] font-bold uppercase tracking-wider">{tm.name}</h4>
@@ -651,7 +651,7 @@ export default function TournamentModule() {
 
           {/* REGISTER SQUAD SUBMIT FORM */}
           <div className="md:col-span-4">
-            <div className="p-5 bg-neutral-950 border border-white/[0.08] rounded-2xl space-y-4 sticky top-24 shadow-2xl">
+            <div className="p-6 bg-neutral-900 border border-white/[0.1] rounded-2xl space-y-4 sticky top-24 shadow-2xl">
               <span className="text-[9.5px] font-bold text-orange-500 uppercase tracking-widest block font-mono">REGISTRATION DESK FORM</span>
               <p className="text-[11px] text-zinc-400 leading-relaxed font-normal font-sans">
                 Organizing a local squad ? Pay matching registration of $50 (COD or UPI simulated) to enter bracket schedules.
@@ -715,29 +715,29 @@ export default function TournamentModule() {
         <div className="space-y-4">
           <span className="text-[9.5px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">ATHLETIC PERFORMANCES LEDGER</span>
           
-          <div className="overflow-x-auto bg-[#0a0a0a] border border-white/[0.08] rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
-            <table className="w-full text-left text-xs text-zinc-300">
-              <thead className="text-[9px] uppercase bg-neutral-900/50 border-b border-white/[0.08] text-zinc-400 font-mono tracking-widest">
+          <div className="overflow-x-auto border border-white/[0.08] rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
+            <table className="premium-table">
+              <thead>
                 <tr>
-                  <th className="p-4 pl-6">Rank</th>
-                  <th className="p-4">Athlete</th>
-                  <th className="p-4">Squad</th>
-                  <th className="p-4 text-center">Points (PPG)</th>
-                  <th className="p-4 text-center">Assists (APG)</th>
-                  <th className="p-4 text-center">Rebounds (RPG)</th>
-                  <th className="p-4 text-right pr-6">Status Index</th>
+                  <th className="text-left">Rank</th>
+                  <th className="text-left">Athlete</th>
+                  <th className="text-left">Squad</th>
+                  <th className="text-center">Points (PPG)</th>
+                  <th className="text-center">Assists (APG)</th>
+                  <th className="text-center">Rebounds (RPG)</th>
+                  <th className="text-right">Status Index</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.03]">
+              <tbody>
                 {LEADERBOARD_STATS.map(stat => (
-                  <tr key={stat.rank} className="last:border-0 hover:bg-white/[0.03] transition-colors leading-normal items-center">
-                    <td className="p-4.5 pl-6 font-mono text-[13px] text-orange-500 font-black">#0{stat.rank}</td>
-                    <td className="p-4.5 font-display font-semibold text-white uppercase tracking-wider text-[11.5px]">{stat.player}</td>
-                    <td className="p-4.5 text-zinc-400 font-sans text-[11.5px]">{stat.team}</td>
-                    <td className="p-4.5 text-center text-white font-mono font-black text-[13px]">{stat.ppg}</td>
-                    <td className="p-4.5 text-center text-zinc-300 font-mono text-[12px]">{stat.apg}</td>
-                    <td className="p-4.5 text-center text-zinc-300 font-mono text-[12px]">{stat.rpg}</td>
-                    <td className="p-4.5 text-right pr-6">
+                  <tr key={stat.rank}>
+                    <td className="rank-cell">#0{stat.rank}</td>
+                    <td className="font-display font-semibold uppercase tracking-wider text-[11.5px]">{stat.player}</td>
+                    <td className="text-zinc-400 font-sans text-[11.5px]">{stat.team}</td>
+                    <td className="text-center text-white font-mono font-black text-[13px]">{stat.ppg}</td>
+                    <td className="text-center text-zinc-300 font-mono text-[12px]">{stat.apg}</td>
+                    <td className="text-center text-zinc-300 font-mono text-[12px]">{stat.rpg}</td>
+                    <td className="text-right">
                       <span className={`text-[8px] font-bold px-2.5 py-1 rounded-full font-mono uppercase border ${
                         stat.rank === 1 
                           ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 

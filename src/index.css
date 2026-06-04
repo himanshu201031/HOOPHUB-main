@@ -1,0 +1,493 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --cream: #0A0A0A;
+  --cream-mid: #121212;
+  --cream-deep: #1A1A1A;
+  --ink: #FFFFFF;
+  --ink-soft: #EDEDED;
+  --ink-muted: #A3A3A3;
+  --ink-faint: #737373;
+  --white: #ffffff;
+  --accent: #E5E5E5;
+  --gold: #f4c430;
+  --silver: #c0c0c0;
+  --bronze: #cd7f32;
+  --font-display: 'Bebas Neue', 'Poppins', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@theme {
+  --font-sans: "Poppins", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Bebas Neue", "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Global noise overlay */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0.12;
+  z-index: 9999;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Glass cards, pills, dark variants in Sophisticated Dark */
+.glass-card {
+  background: rgba(23, 23, 23, 0.55);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.05),
+    0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.glass-pill {
+  background: rgba(18, 18, 18, 0.75);
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.glass-dark {
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+}
+
+/* SVG liquid distortion helper */
+.ec-bend {
+  filter: url(#lg-distort);
+}
+
+/* Typography elements */
+.headline-huge {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.01em;
+}
+
+.section-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.body-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+
+/* Avatar Gradients */
+.grad-1 { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+.grad-2 { background: linear-gradient(135deg, #f472b6, #db2777); }
+.grad-3 { background: linear-gradient(135deg, #22d3ee, #0891b2); }
+.grad-4 { background: linear-gradient(135deg, #34d399, #059669); }
+.grad-5 { background: linear-gradient(135deg, #fbbf24, #d97706); }
+.grad-6 { background: linear-gradient(135deg, #f472b6, #7c3aed); }
+.grad-7 { background: linear-gradient(135deg, #fda4af, #f43f5e); }
+.grad-8 { background: linear-gradient(135deg, #6ee7b7, #2563eb); }
+
+/* Pulse animation for profile button */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  position: relative;
+  animation: pulse-ring 1.8s infinite;
+}
+
+/* Scroll Pulsing opacity */
+@keyframes scrollPulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(6px);
+  }
+}
+
+.scroll-indicator-pulse {
+  animation: scrollPulse 2s infinite ease-in-out;
+}
+
+/* Cities infinite ticker scroll */
+@keyframes cityScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.cities-ticker {
+  display: flex;
+  white-space: nowrap;
+  animation: cityScroll 25s linear infinite;
+}
+
+/* Custom styles for Hero Text Line Shine */
+.hl-line {
+  background: linear-gradient(110deg, #ffffff 0%, #ffffff 40%, #a3a3a3 50%, #ffffff 60%, #ffffff 100%);
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.6s var(--ease-out), transform 0.6s var(--ease-out), letter-spacing 0.6s var(--ease-out);
+  display: block;
+}
+
+.hl-line:hover {
+  background-position: 100% 0%;
+  transform: translateX(10px);
+}
+
+/* Three layer liquid glass event card styles */
+.event-card {
+  position: relative;
+  width: 320px;
+  border-radius: 28px;
+  overflow: hidden;
+  transition: transform 0.65s var(--ease-out);
+}
+
+.ec-bend {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background: rgba(18, 18, 18, 0.55);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  transition: backdrop-filter 0.5s ease;
+}
+
+.ec-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  border-radius: 28px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55), inset 0 -10px 30px rgba(255, 255, 255, 0.05);
+  transition: box-shadow 0.5s ease;
+  pointer-events: none;
+}
+
+.ec-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  border-radius: 28px;
+  background: rgba(26, 26, 26, 0.38);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.08);
+  transition: background 0.5s ease, border-color 0.5s ease;
+  pointer-events: none;
+}
+
+.ec-content {
+  position: relative;
+  z-index: 3;
+  padding: 10px;
+}
+
+/* Hover effects for event-card layer animations */
+.event-card:hover .ec-bend {
+  backdrop-filter: blur(50px) saturate(220%);
+  -webkit-backdrop-filter: blur(50px) saturate(220%);
+}
+
+.event-card:hover .ec-edge {
+  background: rgba(32, 32, 32, 0.45);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.event-card:hover .ec-face {
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), inset 0 -5px 15px rgba(255, 225, 225, 0.1);
+}
+
+/* 3D Canvas element configuration */
+#hero-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  pointer-events: none;
+}
+
+#hero-canvas.drag-enabled {
+  pointer-events: all;
+  cursor: grab;
+}
+
+#hero-canvas.drag-enabled:active {
+  cursor: grabbing;
+}
+
+/* Floating custom styling for layout sections */
+section {
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Hide default cursor on desktop so the custom basketball cursor is fully featured */
+@media (min-width: 768px) {
+  html, body, a, button, input, select, textarea, [role="button"], label, .cursor-pointer, #hero-canvas.drag-enabled {
+    cursor: none !important;
+  }
+}
+
+/* Custom Scroll Pill bar scrolled class state */
+.nav-pill-container.scrolled {
+  background: rgba(10, 10, 10, 0.82) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Page fade-in switch transition */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* BorderGlow component CSS */
+.border-glow-card {
+  --edge-proximity: 0;
+  --cursor-angle: 45deg;
+  --edge-sensitivity: 30;
+  --color-sensitivity: calc(var(--edge-sensitivity) + 20);
+  --border-radius: 28px;
+  --glow-padding: 40px;
+  --cone-spread: 25;
+
+  position: relative;
+  border-radius: var(--border-radius);
+  isolation: isolate;
+  transform: translate3d(0, 0, 0.01px);
+  display: grid;
+  border: 1px solid rgb(255 255 255 / 15%);
+  background: var(--card-bg, #120F17);
+  overflow: visible;
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 1px 2px,
+    rgba(0, 0, 0, 0.1) 0px 2px 4px,
+    rgba(0, 0, 0, 0.1) 0px 4px 8px,
+    rgba(0, 0, 0, 0.1) 0px 8px 16px,
+    rgba(0, 0, 0, 0.1) 0px 16px 32px,
+    rgba(0, 0, 0, 0.1) 0px 32px 64px;
+}
+
+.border-glow-card::before,
+.border-glow-card::after,
+.border-glow-card > .edge-light {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transition: opacity 0.25s ease-out;
+  z-index: -1;
+}
+
+.border-glow-card:not(:hover):not(.sweep-active)::before,
+.border-glow-card:not(:hover):not(.sweep-active)::after,
+.border-glow-card:not(:hover):not(.sweep-active) > .edge-light {
+  opacity: 0;
+  transition: opacity 0.75s ease-in-out;
+}
+
+/* colored mesh-gradient border */
+.border-glow-card::before {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--card-bg, #120F17) 0 100%) padding-box,
+    linear-gradient(rgb(255 255 255 / 0%) 0% 100%) border-box,
+    var(--gradient-one, radial-gradient(at 80% 55%, hsla(268, 100%, 76%, 1) 0px, transparent 50%)) border-box,
+    var(--gradient-two, radial-gradient(at 69% 34%, hsla(349, 100%, 74%, 1) 0px, transparent 50%)) border-box,
+    var(--gradient-three, radial-gradient(at 8% 6%, hsla(136, 100%, 78%, 1) 0px, transparent 50%)) border-box,
+    var(--gradient-four, radial-gradient(at 41% 38%, hsla(192, 100%, 64%, 1) 0px, transparent 50%)) border-box,
+    var(--gradient-five, radial-gradient(at 86% 85%, hsla(186, 100%, 74%, 1) 0px, transparent 50%)) border-box,
+    var(--gradient-six, radial-gradient(at 82% 18%, hsla(52, 100%, 65%, 1) 0px, transparent 50%)) border-box,
+    var(--gradient-seven, radial-gradient(at 51% 4%, hsla(12, 100%, 72%, 1) 0px, transparent 50%)) border-box,
+    var(--gradient-base, linear-gradient(#c299ff 0 100%)) border-box;
+
+  opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+
+  mask-image:
+    conic-gradient(
+      from var(--cursor-angle) at center,
+      black calc(var(--cone-spread) * 1%),
+      transparent calc((var(--cone-spread) + 15) * 1%),
+      transparent calc((100 - var(--cone-spread) - 15) * 1%),
+      black calc((100 - var(--cone-spread)) * 1%)
+    );
+}
+
+/* colored mesh-gradient background fill near edges */
+.border-glow-card::after {
+  border: 1px solid transparent;
+  background:
+    var(--gradient-one, radial-gradient(at 80% 55%, hsla(268, 100%, 76%, 1) 0px, transparent 50%)) padding-box,
+    var(--gradient-two, radial-gradient(at 69% 34%, hsla(349, 100%, 74%, 1) 0px, transparent 50%)) padding-box,
+    var(--gradient-three, radial-gradient(at 8% 6%, hsla(136, 100%, 78%, 1) 0px, transparent 50%)) padding-box,
+    var(--gradient-four, radial-gradient(at 41% 38%, hsla(192, 100%, 64%, 1) 0px, transparent 50%)) padding-box,
+    var(--gradient-five, radial-gradient(at 86% 85%, hsla(186, 100%, 74%, 1) 0px, transparent 50%)) padding-box,
+    var(--gradient-six, radial-gradient(at 82% 18%, hsla(52, 100%, 65%, 1) 0px, transparent 50%)) padding-box,
+    var(--gradient-seven, radial-gradient(at 51% 4%, hsla(12, 100%, 72%, 1) 0px, transparent 50%)) padding-box,
+    var(--gradient-base, linear-gradient(#c299ff 0 100%)) padding-box;
+
+  mask-image:
+    linear-gradient(to bottom, black, black),
+    radial-gradient(ellipse at 50% 50%, black 40%, transparent 65%),
+    radial-gradient(ellipse at 66% 66%, black 5%, transparent 40%),
+    radial-gradient(ellipse at 33% 33%, black 5%, transparent 40%),
+    radial-gradient(ellipse at 66% 33%, black 5%, transparent 40%),
+    radial-gradient(ellipse at 33% 66%, black 5%, transparent 40%),
+    conic-gradient(from var(--cursor-angle) at center, transparent 5%, black 15%, black 85%, transparent 95%);
+
+  mask-composite: subtract, add, add, add, add, add;
+  opacity: calc(var(--fill-opacity, 0.5) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+  mix-blend-mode: soft-light;
+}
+
+/* outer glow layer */
+.border-glow-card > .edge-light {
+  inset: calc(var(--glow-padding) * -1);
+  pointer-events: none;
+  z-index: 1;
+
+  mask-image:
+    conic-gradient(
+      from var(--cursor-angle) at center, black 2.5%, transparent 10%, transparent 90%, black 97.5%
+    );
+
+  opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
+  mix-blend-mode: plus-lighter;
+}
+
+.border-glow-card > .edge-light::before {
+  content: "";
+  position: absolute;
+  inset: var(--glow-padding);
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px var(--glow-color, hsl(40deg 80% 80% / 100%)),
+    inset 0 0 1px 0 var(--glow-color-60, hsl(40deg 80% 80% / 60%)),
+    inset 0 0 3px 0 var(--glow-color-50, hsl(40deg 80% 80% / 50%)),
+    inset 0 0 6px 0 var(--glow-color-40, hsl(40deg 80% 80% / 40%)),
+    inset 0 0 15px 0 var(--glow-color-30, hsl(40deg 80% 80% / 30%)),
+    inset 0 0 25px 2px var(--glow-color-20, hsl(40deg 80% 80% / 20%)),
+    inset 0 0 50px 2px var(--glow-color-10, hsl(40deg 80% 80% / 10%)),
+    0 0 1px 0 var(--glow-color-60, hsl(40deg 80% 80% / 60%)),
+    0 0 3px 0 var(--glow-color-50, hsl(40deg 80% 80% / 50%)),
+    0 0 6px 0 var(--glow-color-40, hsl(40deg 80% 80% / 40%)),
+    0 0 15px 0 var(--glow-color-30, hsl(40deg 80% 80% / 30%)),
+    0 0 25px 2px var(--glow-color-20, hsl(40deg 80% 80% / 20%)),
+    0 0 50px 2px var(--glow-color-10, hsl(40deg 80% 80% / 10%));
+}
+
+.border-glow-inner {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: auto;
+  z-index: 1;
+}
+
+/* HOOPLY text letter animations and interactions */
+.hero-title-char {
+  display: inline-block;
+  cursor: default;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1), -webkit-text-stroke-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, text-shadow;
+  animation: hero-letter-breath 4s ease-in-out infinite alternate;
+}
+
+/* Staggered breathing delay for wavy effect */
+.hero-title-char:nth-child(1) { animation-delay: 0s; }
+.hero-title-char:nth-child(2) { animation-delay: 0.3s; }
+.hero-title-char:nth-child(3) { animation-delay: 0.6s; }
+.hero-title-char:nth-child(4) { animation-delay: 0.9s; }
+.hero-title-char:nth-child(5) { animation-delay: 1.2s; }
+.hero-title-char:nth-child(6) { animation-delay: 1.5s; }
+
+.hero-title-char:hover {
+  transform: translateY(-16px) scale(1.18) rotate(3deg) !important;
+  color: #ffaa44 !important;
+  text-shadow: 0 0 40px rgba(239, 84, 16, 0.9), 0 0 10px rgba(255, 170, 68, 0.5);
+  -webkit-text-stroke-color: #ffaa44 !important;
+  animation-play-state: paused;
+}
+
+@keyframes hero-letter-breath {
+  0% {
+    transform: translateY(0px) scale(1);
+    filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0));
+  }
+  100% {
+    transform: translateY(-4px) scale(1.025);
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+  }
+}

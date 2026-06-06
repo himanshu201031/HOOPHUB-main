@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, MessageSquare, Heart, Video, Plus, ShieldCheck, Share2, Users, Search, Target, ThumbsUp, Send, Check, Bookmark, Bell, Eye } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { User, MessageSquare, Heart, Video, Plus, ShieldCheck, Share2, Users, Search, Target, ThumbsUp, Send, Check, Bookmark, Bell, Eye, MapPin, Calendar, Award, Trophy, Activity, Sparkles, TrendingUp, X, Flame, Map } from 'lucide-react';
 import { playMetallicClick, playSwoosh } from '../utils/audio';
 
 interface PlayerProfile {
@@ -9,6 +9,8 @@ interface PlayerProfile {
   height: string;
   level: 'Rookie' | 'Street King' | 'Pro Legend';
   favoriteCourt: string;
+  xp: number;
+  achievements: string[];
 }
 
 interface FeedPost {
@@ -23,6 +25,35 @@ interface FeedPost {
   comments: { user: string; text: string; time: string }[];
   category: 'highlight' | 'status' | 'notice';
 }
+
+interface CourtHotspot {
+  id: string;
+  name: string;
+  location: string;
+  activeCount: number;
+}
+
+interface PickupRun {
+  id: string;
+  court: string;
+  time: string;
+  gameType: string;
+  host: string;
+  joinedPlayers: string[];
+  maxPlayers: number;
+}
+
+const INITIAL_HOTSPOTS: CourtHotspot[] = [
+  { id: 'h-1', name: 'Bandra Dome Arena', location: 'Bandra West', activeCount: 24 },
+  { id: 'h-2', name: 'Carter Road Cage', location: 'Carter Road', activeCount: 18 },
+  { id: 'h-3', name: 'Bandra East Playground', location: 'Bandra East', activeCount: 7 },
+  { id: 'h-4', name: 'Cyber-Turf Downtown', location: 'Mumbai Main', activeCount: 32 }
+];
+
+const INITIAL_PICKUP_RUNS: PickupRun[] = [
+  { id: 'run-1', court: 'Bandra Dome Arena', time: 'Today, 7:30 PM', gameType: '3v3 Halfcourt', host: 'Kenji_Krossover', joinedPlayers: ['Kenji_Krossover', 'Soma_T'], maxPlayers: 6 },
+  { id: 'run-2', court: 'Carter Road Cage', time: 'Tomorrow, 6:00 PM', gameType: '5v5 Fullcourt', host: 'Yuki_Midrange', joinedPlayers: ['Yuki_Midrange', 'ReboundMonster', 'Hana_Handles'], maxPlayers: 10 }
+];
 
 const INITIAL_POSTS: FeedPost[] = [
   {
@@ -126,7 +157,9 @@ export default function CommunityModule() {
     style: 'Playmaker',
     height: '182 cm',
     level: 'Street King',
-    favoriteCourt: 'Bandra Dome Sports Arena'
+    favoriteCourt: 'Bandra Dome Sports Arena',
+    xp: 2450,
+    achievements: ['Crossover King', 'Ankle Breaker', 'Double-Double Club']
   });
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
   const [tempProfile, setTempProfile] = useState<PlayerProfile>({ ...profile });
@@ -139,6 +172,30 @@ export default function CommunityModule() {
   // Comment tracker
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
   const [newCommentText, setNewCommentText] = useState<string>('');
+
+  // Hotspots and check-in
+  const [hotspots, setHotspots] = useState<CourtHotspot[]>(INITIAL_HOTSPOTS);
+  const [checkedInCourtId, setCheckedInCourtId] = useState<string | null>(null);
+
+  // Active Pickups scheduler
+  const [pickupRuns, setPickupRuns] = useState<PickupRun[]>([]);
+  const [isCreatingRun, setIsCreatingRun] = useState<boolean>(false);
+  const [newRunCourt, setNewRunCourt] = useState<string>('Bandra Dome Arena');
+  const [newRunTime, setNewRunTime] = useState<string>('Today, 8:00 PM');
+  const [newRunType, setNewRunType] = useState<string>('3v3 Halfcourt');
+  const [newRunMaxPlayers, setNewRunMaxPlayers] = useState<number>(6);
+
+  // Feed search and filter
+  const [feedSearch, setFeedSearch] = useState<string>('');
+  const [feedCategoryFilter, setFeedCategoryFilter] = useState<'all' | 'status' | 'highlight' | 'notice'>('all');
+
+  // Success Toast state
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Loaded from storage
   useEffect(() => {
@@ -162,6 +219,26 @@ export default function CommunityModule() {
         setProfile(JSON.parse(storedProfile));
         setTempProfile(JSON.parse(storedProfile));
       }
+
+      const storedHotspots = localStorage.getItem('y68_court_hotspots');
+      if (storedHotspots) {
+        setHotspots(JSON.parse(storedHotspots));
+      } else {
+        localStorage.setItem('y68_court_hotspots', JSON.stringify(INITIAL_HOTSPOTS));
+      }
+
+      const storedCheckIn = localStorage.getItem('y68_court_check_in');
+      if (storedCheckIn) {
+        setCheckedInCourtId(JSON.parse(storedCheckIn));
+      }
+
+      const storedRuns = localStorage.getItem('y68_pickup_runs');
+      if (storedRuns) {
+        setPickupRuns(JSON.parse(storedRuns));
+      } else {
+        setPickupRuns(INITIAL_PICKUP_RUNS);
+        localStorage.setItem('y68_pickup_runs', JSON.stringify(INITIAL_PICKUP_RUNS));
+      }
     } catch (e) {
       console.warn("Local storage loading error inside CommunityModule", e);
     }
@@ -172,13 +249,118 @@ export default function CommunityModule() {
     localStorage.setItem('y68_community_posts', JSON.stringify(updated));
   };
 
+  const savePickupRuns = (updated: PickupRun[]) => {
+    setPickupRuns(updated);
+    localStorage.setItem('y68_pickup_runs', JSON.stringify(updated));
+  };
+
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     playSwoosh();
     setProfile(tempProfile);
     localStorage.setItem('y68_player_profile', JSON.stringify(tempProfile));
     setIsEditingProfile(false);
+    showToast("Profile badge updated successfully!");
   };
+
+  const handleCheckInToggle = (courtId: string) => {
+    playSwoosh();
+    let updatedHotspots = [...hotspots];
+    let nextCheckInId: string | null = null;
+
+    if (checkedInCourtId === courtId) {
+      // Check out
+      updatedHotspots = updatedHotspots.map(h => 
+        h.id === courtId ? { ...h, activeCount: Math.max(0, h.activeCount - 1) } : h
+      );
+      nextCheckInId = null;
+      showToast("Checked out from court.");
+    } else {
+      // Check in (and check out of current if any)
+      updatedHotspots = updatedHotspots.map(h => {
+        if (h.id === courtId) {
+          return { ...h, activeCount: h.activeCount + 1 };
+        } else if (h.id === checkedInCourtId) {
+          return { ...h, activeCount: Math.max(0, h.activeCount - 1) };
+        }
+        return h;
+      });
+      nextCheckInId = courtId;
+      const courtName = hotspots.find(h => h.id === courtId)?.name || "Court";
+      showToast(`Successfully checked in at ${courtName}!`);
+    }
+
+    setHotspots(updatedHotspots);
+    setCheckedInCourtId(nextCheckInId);
+    localStorage.setItem('y68_court_hotspots', JSON.stringify(updatedHotspots));
+    localStorage.setItem('y68_court_check_in', JSON.stringify(nextCheckInId));
+  };
+
+  const handleJoinLeavePickupRun = (runId: string) => {
+    playMetallicClick();
+    const updated = pickupRuns.map(run => {
+      if (run.id === runId) {
+        const isJoined = run.joinedPlayers.includes(profile.name);
+        const nextJoined = isJoined
+          ? run.joinedPlayers.filter(p => p !== profile.name)
+          : [...run.joinedPlayers, profile.name];
+        
+        if (nextJoined.length > run.maxPlayers) {
+          alert("⚠️ This run is fully stacked!");
+          return run;
+        }
+
+        showToast(isJoined ? "Left the pickup run roster." : "Joined the pickup run roster!");
+        return { ...run, joinedPlayers: nextJoined };
+      }
+      return run;
+    });
+
+    savePickupRuns(updated);
+  };
+
+  const handleCreatePickupRun = (e: React.FormEvent) => {
+    e.preventDefault();
+    playSwoosh();
+
+    const newRun: PickupRun = {
+      id: `run-${Date.now()}`,
+      court: newRunCourt,
+      time: newRunTime,
+      gameType: newRunType,
+      host: profile.name,
+      joinedPlayers: [profile.name],
+      maxPlayers: newRunMaxPlayers
+    };
+
+    const updated = [...pickupRuns, newRun];
+    savePickupRuns(updated);
+    setIsCreatingRun(false);
+    showToast(`Scheduled pickup run at ${newRunCourt}!`);
+
+    // publish a post automatic notification
+    const autoPost: FeedPost = {
+      id: `post-auto-${Date.now()}`,
+      user: profile.name,
+      avatar: '🌟',
+      time: 'Just now',
+      text: `🔥 New pickup run scheduled at ${newRunCourt} for ${newRunTime} (${newRunType}). Join up!`,
+      likes: 1,
+      liked: true,
+      category: 'notice',
+      comments: []
+    };
+    savePosts([autoPost, ...posts]);
+  };
+
+  const filteredPosts = useMemo(() => {
+    const s = feedSearch.trim().toLowerCase();
+    return posts.filter(post => {
+      const matchesSearch = !s || post.user.toLowerCase().includes(s) || post.text.toLowerCase().includes(s);
+      const matchesCategory = feedCategoryFilter === 'all' || post.category === feedCategoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [posts, feedSearch, feedCategoryFilter]);
 
   const handleLikePost = (postId: string) => {
     playMetallicClick();
@@ -301,9 +483,26 @@ export default function CommunityModule() {
                 <div className="w-12 h-12 bg-orange-600/10 border border-orange-500/20 text-orange-400 rounded-2xl flex items-center justify-center font-display text-xl font-bold">
                   {profile.name[0]?.toUpperCase()}
                 </div>
-                <div>
-                  <h4 className="font-display font-bold uppercase tracking-wider text-base text-white">{profile.name}</h4>
-                  <span className="text-[9.5px] font-bold text-zinc-500 uppercase font-mono">Rank: <strong className="text-orange-400">{profile.level}</strong></span>
+                <div className="space-y-1 flex-grow">
+                  <div className="flex items-center gap-1">
+                    <h4 className="font-display font-bold uppercase tracking-wider text-base text-white">{profile.name}</h4>
+                    <Sparkles size={12} className="text-orange-500 animate-pulse" />
+                  </div>
+                  <div className="flex items-center justify-between text-[9px] font-bold text-zinc-500 uppercase font-mono">
+                    <span>Rank: <strong className="text-orange-400">{profile.level}</strong></span>
+                    <span className="text-zinc-400 font-bold">{profile.xp || 2450} XP</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* XP LEVEL PROGRESS BAR */}
+              <div className="space-y-1">
+                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-orange-600 to-amber-400" style={{ width: '68%' }} />
+                </div>
+                <div className="flex justify-between text-[8px] text-zinc-600 font-mono">
+                  <span>LEVEL 12</span>
+                  <span>780 XP to LEVEL 13</span>
                 </div>
               </div>
 
@@ -324,6 +523,18 @@ export default function CommunityModule() {
                 <div className="p-2.5 bg-neutral-900 border border-white/5 rounded-xl space-y-0.5">
                   <span className="text-[8px] text-zinc-500 uppercase font-mono block">Favorite Hub Court</span>
                   <span className="text-orange-400 font-bold truncate block">{profile.favoriteCourt.replace('Bandra ', '').replace('Mumbai ', '')}</span>
+                </div>
+              </div>
+
+              {/* ACHIEVEMENTS / UNLOCKED BADGES */}
+              <div className="space-y-1.5">
+                <span className="text-[8px] font-bold text-zinc-400 font-mono uppercase tracking-widest block">Unlocked Play Badges</span>
+                <div className="flex flex-wrap gap-1">
+                  {(profile.achievements || ['Crossover King', 'Ankle Breaker', 'Double-Double Club']).map((ach, idx) => (
+                    <span key={idx} className="px-2 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[8.5px] font-bold font-mono uppercase flex items-center gap-1">
+                      <Award size={9} /> {ach}
+                    </span>
+                  ))}
                 </div>
               </div>
 
@@ -460,6 +671,62 @@ export default function CommunityModule() {
             </form>
           )}
 
+        </div>
+
+        {/* LIVE COURT HOTSPOTS & CHECK-INS */}
+        <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-white/[0.08] rounded-3xl p-6 text-left space-y-4 shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-between pb-3 border-b border-white/5">
+            <span className="text-[9.5px] font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-widest leading-none font-mono">
+              <MapPin size={12} className="text-orange-500 animate-pulse" /> Live Court Check-Ins
+            </span>
+            <span className="text-[8.5px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/10">
+              Active Now
+            </span>
+          </div>
+          <p className="text-[9.5px] text-zinc-500 leading-normal font-sans font-normal">
+            Broadcast your playground presence. Check into a regional court hotspot to let local teammates know you are running pickups!
+          </p>
+
+          <div className="space-y-2.5">
+            {hotspots.map(court => {
+              const isCheckedIn = checkedInCourtId === court.id;
+              return (
+                <div key={court.id} className={`p-3 rounded-xl border transition-all duration-300 flex items-center justify-between gap-3 ${
+                  isCheckedIn 
+                    ? 'bg-orange-500/5 border-orange-500/30' 
+                    : 'bg-[#090909] border-white/[0.03] hover:border-white/10'
+                }`}>
+                  <div className="space-y-0.5 flex-grow min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-white uppercase text-xs truncate">{court.name}</span>
+                      {isCheckedIn && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[7px] font-bold font-mono uppercase">
+                          Here!
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-zinc-500 font-mono block">{court.location}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-[11px] font-mono font-black text-orange-400 bg-orange-500/5 border border-orange-500/5 px-2 py-0.5 rounded">
+                      👤 {court.activeCount}
+                    </span>
+                    <button
+                      onClick={() => handleCheckInToggle(court.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest cursor-pointer transition-colors ${
+                        isCheckedIn
+                          ? 'bg-orange-600 text-white'
+                          : 'bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10'
+                      }`}
+                    >
+                      {isCheckedIn ? 'Out' : 'In'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* DIRECT REC INBOX */}

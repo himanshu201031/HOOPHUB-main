@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Award, Trophy, Users, ShieldAlert, ArrowRight, Play, RefreshCw, Calendar, Flame, Dribbble, Target, Star, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Award, Trophy, Users, ShieldAlert, ArrowRight, Play, RefreshCw, Calendar, Flame, Dribbble, Target, Star, CheckCircle, Search, BarChart3, Crown, Medal, TrendingUp, Activity, Zap, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { playMetallicClick, playSwoosh } from '../utils/audio';
 
@@ -21,6 +21,24 @@ interface TeamRegister {
   playersCount: number;
   seed: number;
 }
+
+interface StandingRow {
+  rank: number;
+  team: string;
+  captain: string;
+  played: number;
+  won: number;
+  lost: number;
+  pf: number;
+  pa: number;
+  diff: number;
+  winPct: number;
+  form: ('W' | 'L')[];
+}
+
+const PLACEHOLDER_NAMES = ['Winner QF1', 'Winner QF2', 'Winner QF3', 'Winner QF4', 'Winner SF1', 'Winner SF2', 'TBD'];
+
+const isPlaceholder = (name: string) => PLACEHOLDER_NAMES.includes(name) || !name;
 
 const INITIAL_TEAMS: TeamRegister[] = [
   { name: 'Mumbai Ronins', captain: 'Kenji_S', playersCount: 5, seed: 1 },
@@ -48,6 +66,14 @@ const INITIAL_MATCHES: Match[] = [
   { id: 'f-1', round: 'finals', team1: 'Winner SF1', score1: 0, team2: 'Winner SF2', score2: 0, completed: false, timeSlot: '06:00 PM' }
 ];
 
+const LEADERBOARD_STATS = [
+  { rank: 1, player: 'Kenji_S', team: 'Mumbai Ronins', ppg: 28.5, apg: 7.2, rpg: 4.1 },
+  { rank: 2, player: 'Takeshi_O', team: 'Bengaluru Shoguns', ppg: 24.1, apg: 1.8, rpg: 12.5 },
+  { rank: 3, player: 'Yuki_M', team: 'Bandra Samurais', ppg: 22.8, apg: 8.9, rpg: 3.5 },
+  { rank: 4, player: 'Soma_T', team: 'Riverside Raptors', ppg: 19.5, apg: 6.0, rpg: 8.2 },
+  { rank: 5, player: 'Hana_H', team: 'Delhi Krosses', ppg: 18.2, apg: 10.4, rpg: 2.1 }
+];
+
 export default function TournamentModule() {
   const [teams, setTeams] = useState<TeamRegister[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -64,12 +90,19 @@ export default function TournamentModule() {
   const [tourneyDate, setTourneyDate] = useState<string>('2026-06-15');
   const [tourneyMaxTeams, setTourneyMaxTeams] = useState<number>(8);
   const [isOrganizerOpen, setIsOrganizerOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'bracket' | 'teams' | 'leaderboard'>('bracket');
+  const [activeTab, setActiveTab] = useState<'bracket' | 'teams' | 'standings' | 'leaderboard'>('bracket');
 
   // Submit squad simulation
   const [newTeamName, setNewTeamName] = useState<string>('');
   const [captainName, setCaptainName] = useState<string>('');
   const [playersQty, setPlayersQty] = useState<number>(5);
+
+  // Teams search / filter
+  const [teamSearch, setTeamSearch] = useState<string>('');
+  const [rosterFilter, setRosterFilter] = useState<'all' | '5' | '6' | '7'>('all');
+
+  // Sortable standings
+  const [standingsSort, setStandingsSort] = useState<'rank' | 'pf' | 'diff' | 'winpct'>('rank');
 
   // Load persistence
   useEffect(() => {
@@ -103,6 +136,98 @@ export default function TournamentModule() {
     setMatches(updated);
     localStorage.setItem('y68_tourney_matches', JSON.stringify(updated));
   };
+
+  // ---- DERIVED LEAGUE ANALYTICS ----
+  const standings: StandingRow[] = useMemo(() => {
+    const acc: Record<string, StandingRow> = {};
+    teams.forEach(t => {
+      acc[t.name] = {
+        rank: 0,
+        team: t.name,
+        captain: t.captain,
+        played: 0,
+        won: 0,
+        lost: 0,
+        pf: 0,
+        pa: 0,
+        diff: 0,
+        winPct: 0,
+        form: []
+      };
+    });
+
+    matches.forEach(m => {
+      if (!m.completed) return;
+      if (isPlaceholder(m.team1) || isPlaceholder(m.team2)) return;
+      if (!acc[m.team1] || !acc[m.team2]) return;
+      acc[m.team1].played += 1;
+      acc[m.team2].played += 1;
+      acc[m.team1].pf += m.score1;
+      acc[m.team1].pa += m.score2;
+      acc[m.team2].pf += m.score2;
+      acc[m.team2].pa += m.score1;
+      if (m.winner === m.team1) {
+        acc[m.team1].won += 1;
+        acc[m.team2].lost += 1;
+        acc[m.team1].form.push('W');
+        acc[m.team2].form.push('L');
+      } else if (m.winner === m.team2) {
+        acc[m.team2].won += 1;
+        acc[m.team1].lost += 1;
+        acc[m.team2].form.push('W');
+        acc[m.team1].form.push('L');
+      }
+    });
+
+    Object.values(acc).forEach(r => {
+      r.diff = r.pf - r.pa;
+      r.winPct = r.played > 0 ? Math.round((r.won / r.played) * 100) : 0;
+      r.form = r.form.slice(-5).reverse();
+    });
+
+    const sorted = Object.values(acc).sort((a, b) => {
+      if (b.won !== a.won) return b.won - a.won;
+      if (b.diff !== a.diff) return b.diff - a.diff;
+      if (b.pf !== a.pf) return b.pf - a.pf;
+      return a.team.localeCompare(b.team);
+    });
+    sorted.forEach((r, idx) => { r.rank = idx + 1; });
+    return sorted;
+  }, [teams, matches]);
+
+  const completedMatchesCount = useMemo(
+    () => matches.filter(m => m.completed && !isPlaceholder(m.team1) && !isPlaceholder(m.team2)).length,
+    [matches]
+  );
+  const totalMatchesCount = useMemo(
+    () => matches.filter(m => !isPlaceholder(m.team1) && !isPlaceholder(m.team2)).length,
+    [matches]
+  );
+
+  const nextMatch: Match | null = useMemo(() => {
+    const playable = matches.find(m => !m.completed && !isPlaceholder(m.team1) && !isPlaceholder(m.team2));
+    if (playable) return playable;
+    return matches.find(m => !m.completed) || null;
+  }, [matches]);
+
+  const championName: string | null = useMemo(() => {
+    const final = matches.find(m => m.round === 'finals');
+    if (final && final.completed && final.winner && !isPlaceholder(final.winner)) return final.winner;
+    return null;
+  }, [matches]);
+
+  const topScorer = useMemo(() => {
+    return [...LEADERBOARD_STATS].sort((a, b) => b.ppg - a.ppg)[0];
+  }, []);
+
+  const filteredTeams = useMemo(() => {
+    const q = teamSearch.trim().toLowerCase();
+    return teams.filter(t => {
+      const matchesQuery = !q || t.name.toLowerCase().includes(q) || t.captain.toLowerCase().includes(q);
+      const matchesRoster = rosterFilter === 'all' || t.playersCount.toString() === rosterFilter;
+      return matchesQuery && matchesRoster;
+    });
+  }, [teams, teamSearch, rosterFilter]);
 
   const handleRegisterTeam = (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,14 +405,6 @@ export default function TournamentModule() {
   };
 
   // MVP Data list
-  const LEADERBOARD_STATS = [
-    { rank: 1, player: 'Kenji_S', team: 'Mumbai Ronins', ppg: 28.5, apg: 7.2, rpg: 4.1 },
-    { rank: 2, player: 'Takeshi_O', team: 'Bengaluru Shoguns', ppg: 24.1, apg: 1.8, rpg: 12.5 },
-    { rank: 3, player: 'Yuki_M', team: 'Bandra Samurais', ppg: 22.8, apg: 8.9, rpg: 3.5 },
-    { rank: 4, player: 'Soma_T', team: 'Riverside Raptors', ppg: 19.5, apg: 6.0, rpg: 8.2 },
-    { rank: 5, player: 'Hana_H', team: 'Delhi Krosses', ppg: 18.2, apg: 10.4, rpg: 2.1 }
-  ];
-
   return (
     <div className="space-y-6 text-left" id="tournament-module-root">
       
@@ -306,17 +423,17 @@ export default function TournamentModule() {
         </div>
 
         <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
-          {(['bracket', 'teams', 'leaderboard'] as const).map(tab => (
+          {(['bracket', 'teams', 'standings', 'leaderboard'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => { playMetallicClick(); setActiveTab(tab); }}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
                 activeTab === tab 
                   ? 'bg-orange-600 text-white shadow-xl' 
                   : 'bg-neutral-900/60 text-zinc-400 hover:text-white hover:bg-neutral-900'
               }`}
             >
-              {tab === 'bracket' ? '🏆 Shootout Bracket' : tab === 'teams' ? '👥 Registrations' : '★ MVP stats'}
+              {tab === 'bracket' ? '🏆 Shootout' : tab === 'teams' ? '👥 Squads' : tab === 'standings' ? '📊 Standings' : '★ MVP'}
             </button>
           ))}
         </div>
@@ -340,6 +457,160 @@ export default function TournamentModule() {
         </div>
 
       </div>
+
+      {/* KPI STATS OVERVIEW CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <motion.div 
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.05 }}
+          className="p-4 bg-gradient-to-br from-orange-950/40 via-neutral-900 to-neutral-900 border border-orange-500/20 rounded-2xl space-y-1.5 relative overflow-hidden"
+        >
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-orange-500/10 rounded-full blur-2xl" />
+          <div className="flex items-center gap-1.5 text-[8.5px] font-mono font-bold text-orange-400 uppercase tracking-widest">
+            <Users size={11} /> Registered Squads
+          </div>
+          <div className="font-display text-3xl text-white font-black leading-none">{teams.length}<span className="text-orange-500 text-base">/{tourneyMaxTeams}</span></div>
+          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-orange-600 to-amber-400 transition-all" style={{ width: `${(teams.length / tourneyMaxTeams) * 100}%` }} />
+          </div>
+          <div className="text-[9px] text-zinc-500 font-mono">{Math.round((teams.length / tourneyMaxTeams) * 100)}% capacity filled</div>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}
+          className="p-4 bg-gradient-to-br from-amber-950/30 via-neutral-900 to-neutral-900 border border-amber-500/15 rounded-2xl space-y-1.5 relative overflow-hidden"
+        >
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl" />
+          <div className="flex items-center gap-1.5 text-[8.5px] font-mono font-bold text-amber-400 uppercase tracking-widest">
+            <Trophy size={11} /> Total Prize Purse
+          </div>
+          <div className="font-display text-2xl text-white font-black leading-none truncate">{tourneyPrize}</div>
+          <div className="flex items-center gap-1 text-[9px] text-amber-300/80 font-mono font-bold">
+            <Zap size={9} className="fill-amber-400" /> Winner takes all + ring
+          </div>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}
+          className="p-4 bg-gradient-to-br from-emerald-950/30 via-neutral-900 to-neutral-900 border border-emerald-500/15 rounded-2xl space-y-1.5 relative overflow-hidden"
+        >
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
+          <div className="flex items-center gap-1.5 text-[8.5px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+            <Activity size={11} /> Matches Logged
+          </div>
+          <div className="font-display text-3xl text-white font-black leading-none">{completedMatchesCount}<span className="text-emerald-500/60 text-base">/{totalMatchesCount}</span></div>
+          <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-emerald-600 to-teal-400 transition-all" style={{ width: totalMatchesCount > 0 ? `${(completedMatchesCount / totalMatchesCount) * 100}%` : '0%' }} />
+          </div>
+          <div className="text-[9px] text-zinc-500 font-mono">{Math.round(totalMatchesCount > 0 ? (completedMatchesCount / totalMatchesCount) * 100 : 0)}% bracket completed</div>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}
+          className="p-4 bg-gradient-to-br from-violet-950/30 via-neutral-900 to-neutral-900 border border-violet-500/15 rounded-2xl space-y-1.5 relative overflow-hidden"
+        >
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-violet-500/10 rounded-full blur-2xl" />
+          <div className="flex items-center gap-1.5 text-[8.5px] font-mono font-bold text-violet-400 uppercase tracking-widest">
+            <Crown size={11} /> Top Scorer (PPG)
+          </div>
+          <div className="font-display text-2xl text-white font-black leading-none truncate">@{topScorer.player}</div>
+          <div className="flex items-center gap-1.5 text-[9px] font-mono text-zinc-400">
+            <span className="text-violet-400 font-bold">{topScorer.ppg.toFixed(1)}</span> PPG
+            <span className="text-zinc-700">·</span>
+            <span className="truncate">{topScorer.team}</span>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* CHAMPION PODIUM (when final complete) */}
+      <AnimatePresence>
+        {championName && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+            className="relative p-6 rounded-2xl bg-gradient-to-br from-yellow-950/40 via-neutral-900 to-orange-950/20 border border-yellow-500/30 overflow-hidden"
+          >
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-0 left-1/4 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl animate-pulse" />
+            </div>
+            <div className="relative flex flex-col md:flex-row items-center gap-5">
+              <motion.div 
+                animate={{ rotate: [0, -8, 8, -4, 4, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-[0_0_40px_rgba(250,204,21,0.5)]"
+              >
+                <Crown size={40} className="text-black" fill="currentColor" />
+              </motion.div>
+              <div className="flex-1 text-center md:text-left space-y-1">
+                <div className="text-[10px] font-mono font-extrabold text-yellow-400 uppercase tracking-widest flex items-center justify-center md:justify-start gap-2">
+                  <Medal size={12} /> 👑 CHAMPION CROWNED
+                </div>
+                <h2 className="font-display text-3xl md:text-4xl font-black text-white uppercase tracking-tight leading-none">
+                  {championName}
+                </h2>
+                <p className="text-[11px] text-zinc-300 font-mono">
+                  Claims the {tourneyPrize} and the Golden Championship Ring 🏆
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { playMetallicClick(); handleResetTournament(); }}
+                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest cursor-pointer flex items-center gap-1.5"
+                >
+                  <RefreshCw size={11} /> Re-seed
+                </button>
+                <button
+                  onClick={() => { playSwoosh(); setActiveTab('standings'); }}
+                  className="px-4 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black text-[10px] font-extrabold uppercase tracking-widest cursor-pointer flex items-center gap-1.5 shadow-lg"
+                >
+                  <BarChart3 size={11} /> View Standings
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* NEXT FEATURED MATCH CALLOUT */}
+      {nextMatch && !championName && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+          className="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 rounded-2xl bg-gradient-to-r from-neutral-900 via-neutral-900 to-orange-950/20 border border-orange-500/20"
+        >
+          <div className="md:col-span-3 flex flex-col justify-center gap-1.5">
+            <div className="text-[8.5px] font-mono font-extrabold text-orange-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Flame size={11} className="animate-pulse" /> Next Tip-off
+            </div>
+            <div className="font-display text-2xl text-white font-black leading-none flex items-center gap-1.5">
+              <Calendar size={16} className="text-orange-500" /> {nextMatch.timeSlot}
+            </div>
+            <div className="text-[9.5px] text-zinc-500 font-mono uppercase">{tourneyDate} · Round {nextMatch.round}</div>
+          </div>
+          <div className="md:col-span-6 flex items-center justify-around gap-3 py-2">
+            <div className="flex-1 text-right space-y-0.5">
+              <div className="font-display text-sm font-bold text-white uppercase tracking-wide truncate">{nextMatch.team1}</div>
+              <div className="text-[9px] text-zinc-500 font-mono">Seed Team</div>
+            </div>
+            <div className="px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-display text-xs font-black tracking-widest">
+              VS
+            </div>
+            <div className="flex-1 text-left space-y-0.5">
+              <div className="font-display text-sm font-bold text-white uppercase tracking-wide truncate">{nextMatch.team2}</div>
+              <div className="text-[9px] text-zinc-500 font-mono">Seed Team</div>
+            </div>
+          </div>
+          <div className="md:col-span-3 flex items-center justify-end">
+            <button
+              onClick={() => { playSwoosh(); handleSimulateMatch(nextMatch.id); }}
+              className="w-full md:w-auto px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-extrabold uppercase tracking-widest cursor-pointer flex items-center justify-center gap-1.5 shadow-lg"
+            >
+              <Play size={11} className="fill-white" /> Sim Match
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* PLAY-BY-PLAY EVENT SIMULATION TICKER */}
       <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-2.5">
@@ -626,27 +897,103 @@ export default function TournamentModule() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
           <div className="md:col-span-8 space-y-4">
-            <span className="text-[9.5px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">REGISTERED SQUADS ({teams.length})</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {teams.map((tm, idx) => (
-                <div key={idx} className="p-5 bg-neutral-900 border border-white/[0.08] hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1.5 rounded-2xl flex flex-col justify-between text-xs space-y-3.5 shadow-xl">
-                  <div className="space-y-2 text-left">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-display text-white text-[13.5px] font-bold uppercase tracking-wider">{tm.name}</h4>
-                      <span className="text-[8.5px] font-mono bg-[#111] border border-white/5 px-2 py-0.5 rounded-full text-zinc-400 font-bold">Seed #0{tm.seed}</span>
-                    </div>
-                    <div className="text-[11px] leading-relaxed text-zinc-400 space-y-0.5">
-                      <p className="flex items-center gap-1.5"><span className="text-zinc-600 font-mono">Captain:</span> <strong className="text-white">@{tm.captain}</strong></p>
-                      <p className="flex items-center gap-1.5"><span className="text-zinc-600 font-mono">Roster Size:</span> <strong className="text-orange-400">{tm.playersCount} Players</strong></p>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-white/[0.04] text-[8.5px] text-emerald-400 font-bold uppercase font-mono tracking-widest flex items-center gap-1.5">
-                    <CheckCircle size={10} /> SQUAD PASSPORT VERIFIED
-                  </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <span className="text-[9.5px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">REGISTERED SQUADS ({filteredTeams.length}/{teams.length})</span>
+              <div className="flex gap-2 flex-wrap">
+                <div className="relative">
+                  <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search squads…"
+                    value={teamSearch}
+                    onChange={(e) => setTeamSearch(e.target.value)}
+                    className="pl-7 pr-7 py-1.5 bg-neutral-900 border border-white/10 rounded-lg text-[10px] text-white placeholder:text-zinc-600 outline-none focus:border-orange-500/40 font-mono w-44"
+                  />
+                  {teamSearch && (
+                    <button onClick={() => setTeamSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
+                      <X size={10} />
+                    </button>
+                  )}
                 </div>
-              ))}
+                <div className="flex items-center gap-1 bg-neutral-900 border border-white/10 rounded-lg p-0.5">
+                  {(['all', '5', '6', '7'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => { playMetallicClick(); setRosterFilter(f); }}
+                      className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-colors ${
+                        rosterFilter === f ? 'bg-orange-600 text-white' : 'text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      {f === 'all' ? 'All' : `${f}v${f}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            {filteredTeams.length === 0 ? (
+              <div className="p-10 text-center border border-dashed border-white/10 rounded-2xl bg-neutral-900/40">
+                <Filter size={28} className="mx-auto text-zinc-700 mb-3" />
+                <div className="text-[11px] font-mono text-zinc-500 uppercase tracking-widest">No squads match your filter</div>
+                <button
+                  onClick={() => { setTeamSearch(''); setRosterFilter('all'); }}
+                  className="mt-3 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] text-zinc-300 font-bold uppercase tracking-widest"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {filteredTeams.map((tm, idx) => {
+                  const teamStanding = standings.find(s => s.team === tm.name);
+                  return (
+                    <motion.div 
+                      key={idx} 
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: idx * 0.03 }}
+                      className="p-5 bg-neutral-900 border border-white/[0.08] hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1.5 rounded-2xl flex flex-col justify-between text-xs space-y-3.5 shadow-xl"
+                    >
+                      <div className="space-y-2 text-left">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="font-display text-white text-[13.5px] font-bold uppercase tracking-wider truncate">{tm.name}</h4>
+                          <span className="text-[8.5px] font-mono bg-[#111] border border-white/5 px-2 py-0.5 rounded-full text-zinc-400 font-bold shrink-0">Seed #0{tm.seed}</span>
+                        </div>
+                        <div className="text-[11px] leading-relaxed text-zinc-400 space-y-0.5">
+                          <p className="flex items-center gap-1.5"><span className="text-zinc-600 font-mono">Captain:</span> <strong className="text-white">@{tm.captain}</strong></p>
+                          <p className="flex items-center gap-1.5"><span className="text-zinc-600 font-mono">Roster Size:</span> <strong className="text-orange-400">{tm.playersCount} Players</strong></p>
+                        </div>
+
+                        {teamStanding && teamStanding.played > 0 && (
+                          <div className="flex items-center gap-2 pt-2 border-t border-white/[0.04]">
+                            <div className="flex items-center gap-1 text-[9px] font-mono">
+                              <span className="text-zinc-500">W</span>
+                              <span className="text-emerald-400 font-black">{teamStanding.won}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[9px] font-mono">
+                              <span className="text-zinc-500">L</span>
+                              <span className="text-rose-400 font-black">{teamStanding.lost}</span>
+                            </div>
+                            <div className="text-[9px] font-mono text-zinc-500">PF {teamStanding.pf}</div>
+                            <div className="ml-auto flex items-center gap-0.5">
+                              {teamStanding.form.length === 0 ? (
+                                <span className="text-[8px] text-zinc-600 font-mono">—</span>
+                              ) : teamStanding.form.map((f, i) => (
+                                <span key={i} className={`w-2 h-2 rounded-full ${f === 'W' ? 'bg-emerald-500' : 'bg-rose-500'}`} title={f === 'W' ? 'Win' : 'Loss'} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-2 border-t border-white/[0.04] text-[8.5px] text-emerald-400 font-bold uppercase font-mono tracking-widest flex items-center gap-1.5">
+                        <CheckCircle size={10} /> SQUAD PASSPORT VERIFIED
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* REGISTER SQUAD SUBMIT FORM */}
@@ -707,6 +1054,172 @@ export default function TournamentModule() {
             </div>
           </div>
 
+        </div>
+      )}
+
+      {/* TAB 3: LEAGUE STANDINGS TABLE */}
+      {activeTab === 'standings' && (
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 size={14} className="text-orange-500" />
+              <span className="text-[9.5px] font-bold text-zinc-400 uppercase tracking-widest block font-mono">OFFICIAL LEAGUE STANDINGS</span>
+              <span className="text-[8.5px] font-mono bg-white/5 text-zinc-500 px-2 py-0.5 rounded-full border border-white/5">
+                {standings.length} Squads
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[8.5px] text-zinc-500 font-mono uppercase tracking-widest">Sort:</span>
+              {([
+                { key: 'rank', label: 'Rank' },
+                { key: 'pf', label: 'Points' },
+                { key: 'diff', label: 'Differential' },
+                { key: 'winpct', label: 'Win %' }
+              ] as const).map(s => (
+                <button
+                  key={s.key}
+                  onClick={() => { playMetallicClick(); setStandingsSort(s.key); }}
+                  className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-colors ${
+                    standingsSort === s.key 
+                      ? 'bg-orange-600 text-white' 
+                      : 'bg-white/5 text-zinc-500 hover:text-white'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="overflow-x-auto border border-white/[0.08] rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  <th className="text-left w-16">#</th>
+                  <th className="text-left">Squad / Captain</th>
+                  <th className="text-center">P</th>
+                  <th className="text-center">W</th>
+                  <th className="text-center">L</th>
+                  <th className="text-center">PF</th>
+                  <th className="text-center">PA</th>
+                  <th className="text-center">+/-</th>
+                  <th className="text-center">Win%</th>
+                  <th className="text-center">Form (L5)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...standings]
+                  .sort((a, b) => {
+                    if (standingsSort === 'rank') return a.rank - b.rank;
+                    if (standingsSort === 'pf') return b.pf - a.pf;
+                    if (standingsSort === 'diff') return b.diff - a.diff;
+                    if (standingsSort === 'winpct') return b.winPct - a.winPct;
+                    return 0;
+                  })
+                  .map(row => {
+                    const isPodium = row.rank <= 3 && row.played > 0;
+                    return (
+                      <tr key={row.team} className={isPodium ? 'bg-gradient-to-r from-orange-500/[0.04] to-transparent' : ''}>
+                        <td className="rank-cell">
+                          <div className="flex items-center gap-1.5">
+                            {row.rank === 1 && row.played > 0 ? <Crown size={12} className="text-yellow-400" fill="currentColor" /> :
+                             row.rank === 2 && row.played > 0 ? <Medal size={12} className="text-zinc-300" /> :
+                             row.rank === 3 && row.played > 0 ? <Medal size={12} className="text-amber-700" /> :
+                             null}
+                            <span className={row.rank === 1 && row.played > 0 ? 'text-yellow-400' : ''}>{String(row.rank).padStart(2, '0')}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex flex-col">
+                            <span className="font-display font-semibold uppercase tracking-wider text-[11.5px] text-white">{row.team}</span>
+                            <span className="text-[9.5px] text-zinc-500 font-mono">@{row.captain}</span>
+                          </div>
+                        </td>
+                        <td className="text-center font-mono text-[12px] text-zinc-300">{row.played}</td>
+                        <td className="text-center font-mono font-black text-[12.5px] text-emerald-400">{row.won}</td>
+                        <td className="text-center font-mono text-[12px] text-rose-400">{row.lost}</td>
+                        <td className="text-center font-mono text-[12px] text-zinc-300">{row.pf}</td>
+                        <td className="text-center font-mono text-[12px] text-zinc-500">{row.pa}</td>
+                        <td className={`text-center font-mono font-bold text-[12.5px] ${row.diff > 0 ? 'text-emerald-400' : row.diff < 0 ? 'text-rose-400' : 'text-zinc-500'}`}>
+                          {row.diff > 0 ? '+' : ''}{row.diff}
+                        </td>
+                        <td className="text-center font-mono text-[12px] text-zinc-300">
+                          <div className="inline-flex flex-col items-center gap-0.5 min-w-[60px]">
+                            <span>{row.winPct}%</span>
+                            <div className="w-12 h-1 bg-white/5 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-orange-600 to-amber-400" style={{ width: `${row.winPct}%` }} />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="text-center">
+                          <div className="inline-flex items-center justify-center gap-1">
+                            {row.form.length === 0 ? (
+                              <span className="text-[9px] text-zinc-600 font-mono">—</span>
+                            ) : (
+                              <>
+                                {row.form.map((f, i) => (
+                                  <span
+                                    key={i}
+                                    title={f === 'W' ? 'Win' : 'Loss'}
+                                    className={`w-2.5 h-2.5 rounded-full ${
+                                      f === 'W' 
+                                        ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' 
+                                        : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]'
+                                    }`}
+                                  />
+                                ))}
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Legend / Quick Stats Below Standings */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3 rounded-xl bg-neutral-900 border border-white/5 space-y-1">
+              <div className="text-[8.5px] font-mono font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                <Crown size={10} className="text-yellow-400" /> Top of Table
+              </div>
+              <div className="font-display text-sm font-bold text-white truncate">
+                {standings[0]?.played > 0 ? standings[0].team : 'Pending games'}
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-neutral-900 border border-white/5 space-y-1">
+              <div className="text-[8.5px] font-mono font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                <TrendingUp size={10} className="text-emerald-400" /> Best Differential
+              </div>
+              <div className="font-display text-sm font-bold text-white truncate">
+                {[...standings].sort((a,b) => b.diff - a.diff)[0]?.team || '—'}
+              </div>
+              <div className="text-[9px] font-mono text-emerald-400">
+                +{[...standings].sort((a,b) => b.diff - a.diff)[0]?.diff || 0} pts
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-neutral-900 border border-white/5 space-y-1">
+              <div className="text-[8.5px] font-mono font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                <Target size={10} className="text-orange-400" /> Highest Scoring
+              </div>
+              <div className="font-display text-sm font-bold text-white truncate">
+                {[...standings].sort((a,b) => b.pf - a.pf)[0]?.team || '—'}
+              </div>
+              <div className="text-[9px] font-mono text-orange-400">
+                {[...standings].sort((a,b) => b.pf - a.pf)[0]?.pf || 0} total pts
+              </div>
+            </div>
+            <div className="p-3 rounded-xl bg-neutral-900 border border-white/5 space-y-1">
+              <div className="text-[8.5px] font-mono font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                <ShieldAlert size={10} className="text-rose-400" /> Winless
+              </div>
+              <div className="font-display text-sm font-bold text-white">
+                {standings.filter(s => s.played > 0 && s.won === 0).length} <span className="text-zinc-600">squads</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

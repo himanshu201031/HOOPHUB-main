@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Target, Contrast, RotateCcw, BoxSelect, Maximize, Orbit, Palette, Zap, Activity, Sun, SunDim, Save, Download, Upload, Shuffle } from 'lucide-react';
 import { playMetallicClick, playSwoosh } from '../utils/audio';
+
 
 
 interface Preset {
@@ -110,7 +111,7 @@ export default function CustomLab() {
   const SIGNATURE_SPINS = ['The Corkscrew', 'Reverse Backspin', 'Top Rock Wobble', 'Gravity Drop'];
   const [spinIdx, setSpinIdx] = useState(0);
 
-  const updateLighting = (config: {
+  const updateLighting = useCallback((config: {
     dirLight1Enabled?: boolean;
     dirLight1Intensity?: number;
     dirLight2Enabled?: boolean;
@@ -126,7 +127,8 @@ export default function CustomLab() {
       ...config
     };
     window.dispatchEvent(new CustomEvent('basketball-lights-update', { detail: eventDetail }));
-  };
+  }, [ambientLightIntensity, dirLight1Enabled, dirLight1Intensity, dirLight2Enabled, dirLight2Intensity]);
+
 
   const handleResetLab = () => {
     handleApplyPreset(PRESETS[0]);
@@ -149,7 +151,7 @@ export default function CustomLab() {
     }));
   };
 
-  const updateCustomization = (config: Partial<Preset> & { ballScaleMultiplier?: number; metalness?: number }) => {
+  const dispatchCustomize = useCallback((config: Partial<Preset> & { ballScaleMultiplier?: number; metalness?: number }) => {
     const defaultData = {
       baseColor,
       pebbleColor,
@@ -161,10 +163,29 @@ export default function CustomLab() {
       autoSpinY,
       ballScaleMultiplier
     };
-    
+
     const combined = { ...defaultData, ...config };
     window.dispatchEvent(new CustomEvent('basketball-customize', { detail: combined }));
+  }, [ambientLightIntensity, autoSpinY, baseColor, ballScaleMultiplier, bumpScale, lipColor, metalness, pebbleColor, roughness, seamColor]);
+
+  // Throttle customization dispatch to avoid event spam while dragging sliders.
+  const customizeRafRef = useRef<number | null>(null);
+  const pendingCustomizeRef = useRef<typeof dispatchCustomize extends (a: infer A) => any ? A : any>(null);
+
+  const updateCustomization = (config: Partial<Preset> & { ballScaleMultiplier?: number; metalness?: number }) => {
+    pendingCustomizeRef.current = config;
+
+    if (customizeRafRef.current != null) return;
+
+    customizeRafRef.current = window.requestAnimationFrame(() => {
+      customizeRafRef.current = null;
+      if (pendingCustomizeRef.current) {
+        dispatchCustomize(pendingCustomizeRef.current);
+        pendingCustomizeRef.current = null;
+      }
+    });
   };
+
 
   const handleApplyPreset = (p: Preset) => {
     playSwoosh();

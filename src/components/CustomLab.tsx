@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Target, Contrast, RotateCcw, BoxSelect, Maximize, Orbit, Palette, Zap, Activity, Sun, SunDim } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Target, Contrast, RotateCcw, BoxSelect, Maximize, Orbit, Palette, Zap, Activity, Sun, SunDim, Save, Download, Upload, Shuffle } from 'lucide-react';
 import { playMetallicClick, playSwoosh } from '../utils/audio';
+
 
 interface Preset {
   name: string;

@@ -40,6 +40,7 @@ interface VelocityTextProps {
   scrollerClassName?: string;
   parallaxStyle?: React.CSSProperties;
   scrollerStyle?: React.CSSProperties;
+  key?: React.Key;
 }
 
 interface ScrollVelocityProps {

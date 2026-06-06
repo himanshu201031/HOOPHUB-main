@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import MapModal from './MapModal';
-import CircularText from './CircularText';
+
 import { playMetallicClick, playSwoosh } from '../utils/audio';
 import { MapPin, Plus, ShoppingCart, Trash2, ArrowRight, X, Sparkles } from 'lucide-react';
 
@@ -58,7 +58,7 @@ export default function HeroSection() {
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'shop' | 'booking' | 'match'>('shop');
-  
+
   // Cart, Teammates, Booking persistence state
   const [teammates, setTeammates] = useState<Teammate[]>(INITIAL_TEAMMATES);
   const [bookings, setBookings] = useState<{ id: string; courtName: string; date: string; time: string; duration: string }[]>([]);
@@ -70,7 +70,7 @@ export default function HeroSection() {
   const [newTeammateName, setNewTeammateName] = useState('');
   const [newTeammatePos, setNewTeammatePos] = useState('PG');
   const [newTeammateLevel, setNewTeammateLevel] = useState('A');
-  
+
   const [selectedCourtId, setSelectedCourtId] = useState('c1');
   const [bookingDate, setBookingDate] = useState('Today');
   const [bookingTime, setBookingTime] = useState('06:00 PM');
@@ -90,7 +90,7 @@ export default function HeroSection() {
     try {
       const storedBookings = localStorage.getItem('y68_bookings');
       if (storedBookings) setBookings(JSON.parse(storedBookings));
-      
+
       const storedTeammates = localStorage.getItem('y68_teammates');
       if (storedTeammates) setTeammates(JSON.parse(storedTeammates));
     } catch (e) {
@@ -162,7 +162,7 @@ export default function HeroSection() {
   const handleAddTeammate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTeammateName.trim()) return;
-    
+
     const newMember: Teammate = {
       id: 'team_' + Date.now(),
       name: newTeammateName.trim(),
@@ -205,39 +205,39 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section 
-      id="hero-section" 
+    <section
+      id="hero-section"
       className="relative min-h-screen w-full flex flex-col justify-between pt-32 pb-12 px-6 md:px-12 overflow-hidden bg-transparent select-none pointer-events-none *:pointer-events-auto"
     >
       {/* BACKGROUND ATMOSPHERIC GRID & OCCASIONAL CYBERNETIC NEON GLOWS */}
       <div className="absolute inset-0 z-0 opacity-15 pointer-events-none bg-[radial-gradient(#1e1e1e_1.5px,transparent_1.5px)] [background-size:24px_24px]" />
 
       {/* GIANT HOOPLY DISPLAY TITLE SCREEN LAYER (Z: 20) */}
-      <div 
+      <div
         ref={hooplyContainerRef}
         className="absolute inset-x-0 top-[48%] -translate-y-1/2 z-10 pointer-events-none flex items-center justify-center w-full"
       >
         <h1 className="flex font-black font-sans leading-none tracking-tight text-[11.5vw] md:text-[13vw] uppercase select-none w-full justify-center items-center">
           <span className="text-white hero-title-char">H</span>
           <span className="text-white hero-title-char">O</span>
-          
+
           {/* Outlined O: The center point coincides with the centered 3D basketball! */}
-          <span 
+          <span
             className="text-transparent hero-title-char relative mx-1"
-            style={{ 
-              WebkitTextStroke: '1.2px rgba(255,255,255,0.7)', 
-              textStroke: '1.2px rgba(255,255,255,0.7)' 
+            style={{
+              WebkitTextStroke: '1.2px rgba(255,255,255,0.7)',
+              textStroke: '1.2px rgba(255,255,255,0.7)'
             }}
           >
             O
           </span>
-          
+
           {/* Outlined P */}
-          <span 
+          <span
             className="text-transparent hero-title-char relative mr-1"
-            style={{ 
-              WebkitTextStroke: '1.2px rgba(255,255,255,0.7)', 
-              textStroke: '1.2px rgba(255,255,255,0.7)' 
+            style={{
+              WebkitTextStroke: '1.2px rgba(255,255,255,0.7)',
+              textStroke: '1.2px rgba(255,255,255,0.7)'
             }}
           >
             P
@@ -296,7 +296,7 @@ export default function HeroSection() {
         <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[9990] flex items-center justify-start anim-fade-in pointer-events-auto">
           <div className="w-full max-w-lg h-full bg-[#0d0d0e] border-r border-white/[0.08] shadow-2xl p-6 md:p-8 flex flex-col justify-between space-y-6 relative overflow-y-auto">
             {/* Close button */}
-            <button 
+            <button
               onClick={() => { playMetallicClick(); setIsPanelOpen(false); }}
               className="absolute top-5 right-5 w-9 h-9 rounded-full bg-neutral-900 hover:bg-neutral-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors shadow"
             >
@@ -320,31 +320,28 @@ export default function HeroSection() {
             <div className="grid grid-cols-3 bg-neutral-900/60 p-1 rounded-xl border border-white/5 relative z-10">
               <button
                 onClick={() => { playMetallicClick(); setActiveTab('shop'); }}
-                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${
-                  activeTab === 'shop' 
-                    ? 'bg-white text-black font-extrabold shadow' 
+                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${activeTab === 'shop'
+                    ? 'bg-white text-black font-extrabold shadow'
                     : 'text-zinc-500 hover:text-white'
-                }`}
+                  }`}
               >
                 Shop Gear
               </button>
               <button
                 onClick={() => { playMetallicClick(); setActiveTab('booking'); }}
-                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${
-                  activeTab === 'booking' 
-                    ? 'bg-white text-black font-extrabold shadow' 
+                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${activeTab === 'booking'
+                    ? 'bg-white text-black font-extrabold shadow'
                     : 'text-zinc-500 hover:text-white'
-                }`}
+                  }`}
               >
                 Book Court
               </button>
               <button
                 onClick={() => { playMetallicClick(); setActiveTab('match'); }}
-                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${
-                  activeTab === 'match' 
-                    ? 'bg-white text-black font-extrabold shadow' 
+                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${activeTab === 'match'
+                    ? 'bg-white text-black font-extrabold shadow'
                     : 'text-zinc-500 hover:text-white'
-                }`}
+                  }`}
               >
                 Teammates
               </button>
@@ -360,7 +357,7 @@ export default function HeroSection() {
                       <p className="text-[9.5px] text-zinc-500 font-semibold mt-1">Acquire elite signature leather basketballs</p>
                     </div>
 
-                    <button 
+                    <button
                       onClick={() => { playMetallicClick(); setIsCheckoutOpen(true); setCheckoutStep('cart'); }}
                       className="px-3 py-1.5 rounded-lg bg-orange-600/10 border border-orange-500/20 text-orange-400 text-[10px] font-bold tracking-widest uppercase hover:bg-orange-600/20 transition-all flex items-center gap-1.5 cursor-pointer relative"
                     >
@@ -378,9 +375,9 @@ export default function HeroSection() {
                     {PRODUCTS.map(product => (
                       <div key={product.id} className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 flex flex-col justify-between gap-3 transition-colors">
                         <div className="flex items-center gap-3">
-                          <img 
-                            src={product.image} 
-                            alt={product.name} 
+                          <img
+                            src={product.image}
+                            alt={product.name}
                             referrerPolicy="no-referrer"
                             className="w-12 h-12 object-cover rounded-lg border border-white/5 grayscale group-hover:grayscale-0 transition-all"
                           />
@@ -392,7 +389,7 @@ export default function HeroSection() {
 
                         <div className="flex items-center justify-between pt-1 border-t border-white/[0.02]">
                           <span className="font-mono text-xs font-bold text-orange-400">${product.price}</span>
-                          <button 
+                          <button
                             onClick={() => addToCart(product)}
                             className="px-3 py-1 text-[9px] font-bold uppercase rounded-lg bg-white hover:bg-zinc-200 text-black cursor-pointer flex items-center gap-1 transition-all"
                           >
@@ -416,7 +413,7 @@ export default function HeroSection() {
                   <div className="space-y-3.5">
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Select Location Court</label>
-                      <select 
+                      <select
                         value={selectedCourtId}
                         onChange={(e) => setSelectedCourtId(e.target.value)}
                         className="bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white outline-none font-bold cursor-pointer"
@@ -432,7 +429,7 @@ export default function HeroSection() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Appointment Day</label>
-                        <select 
+                        <select
                           value={bookingDate}
                           onChange={(e) => setBookingDate(e.target.value)}
                           className="bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white outline-none font-bold cursor-pointer"
@@ -446,7 +443,7 @@ export default function HeroSection() {
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Time Window</label>
-                        <select 
+                        <select
                           value={bookingTime}
                           onChange={(e) => setBookingTime(e.target.value)}
                           className="bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white outline-none font-bold cursor-pointer"
@@ -462,7 +459,7 @@ export default function HeroSection() {
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Game Duration</label>
-                      <select 
+                      <select
                         value={bookingDuration}
                         onChange={(e) => setBookingDuration(e.target.value)}
                         className="bg-neutral-900 border border-white/10 rounded-xl py-2 px-3 text-xs text-white outline-none font-bold cursor-pointer"
@@ -474,14 +471,14 @@ export default function HeroSection() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-2">
-                      <button 
+                      <button
                         onClick={() => setIsMapOpen(true)}
                         className="px-4 py-3 rounded-xl border border-white/15 hover:bg-white/5 text-[10.5px] font-bold text-zinc-200 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                       >
                         <MapPin size={12} className="text-orange-500" /> Interactive Map Center
                       </button>
-                      
-                      <button 
+
+                      <button
                         onClick={handleBookCourt}
                         className="px-4 py-3 rounded-xl bg-[#d4f82a] hover:bg-[#c2e425] text-black text-[10.5px] font-black uppercase tracking-widest transition-all cursor-pointer text-center font-sans shadow"
                       >
@@ -496,7 +493,7 @@ export default function HeroSection() {
                           {bookings.map(b => (
                             <div key={b.id} className="p-2.5 rounded-xl bg-orange-600/5 border border-orange-500/10 flex items-center justify-between text-xs text-orange-200">
                               <span className="font-bold">{b.courtName} ({b.date} - {b.time})</span>
-                              <button 
+                              <button
                                 onClick={() => handleCancelBooking(b.id)}
                                 className="text-zinc-500 hover:text-red-400 text-[10px] font-bold underline px-1.5 cursor-pointer"
                               >
@@ -539,11 +536,10 @@ export default function HeroSection() {
                         <button
                           onClick={() => handleInviteTeammate(t.id)}
                           disabled={t.invited}
-                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all tracking-wider ${
-                            t.invited 
-                              ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-800/10' 
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all tracking-wider ${t.invited
+                              ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-800/10'
                               : 'bg-white text-black hover:bg-zinc-200 cursor-pointer'
-                          }`}
+                            }`}
                         >
                           {t.invited ? '✓ Team Invited' : 'Send Invite'}
                         </button>
@@ -555,7 +551,7 @@ export default function HeroSection() {
                   <form onSubmit={handleAddTeammate} className="pt-3 border-t border-white/5 space-y-2.5">
                     <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Enroll in Local Matchmaking matchmaking</span>
                     <div className="grid grid-cols-[1.5fr_1fr_1fr_0.6fr] gap-2">
-                      <input 
+                      <input
                         type="text"
                         required
                         placeholder="Your athlete name"
@@ -563,7 +559,7 @@ export default function HeroSection() {
                         onChange={(e) => setNewTeammateName(e.target.value)}
                         className="bg-neutral-900 border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none w-full"
                       />
-                      <select 
+                      <select
                         value={newTeammatePos}
                         onChange={(e) => setNewTeammatePos(e.target.value)}
                         className="bg-neutral-900 border border-white/5 rounded-xl px-2 py-2 text-xs text-white outline-none cursor-pointer"
@@ -574,7 +570,7 @@ export default function HeroSection() {
                         <option value="PF">PF (Forward)</option>
                         <option value="C">C (Center)</option>
                       </select>
-                      <select 
+                      <select
                         value={newTeammateLevel}
                         onChange={(e) => setNewTeammateLevel(e.target.value)}
                         className="bg-neutral-900 border border-white/5 rounded-xl px-2 py-2 text-xs text-white outline-none cursor-pointer"
@@ -584,7 +580,7 @@ export default function HeroSection() {
                         <option value="B">Lv. B</option>
                         <option value="C">Lv. C</option>
                       </select>
-                      <button 
+                      <button
                         type="submit"
                         className="rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold cursor-pointer h-full text-xs flex items-center justify-center transition-all active:scale-95"
                       >
@@ -612,11 +608,11 @@ export default function HeroSection() {
       {isCheckoutOpen && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[10000] flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-neutral-950 border border-white/[0.08] rounded-2xl p-6 relative shadow-2xl space-y-4">
-            
+
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <h3 className="font-display text-white text-md font-bold tracking-wider uppercase">Order Basket checkout</h3>
-              <button 
-                onClick={() => setIsCheckoutOpen(false)} 
+              <button
+                onClick={() => setIsCheckoutOpen(false)}
                 className="w-7 h-7 rounded-full bg-neutral-900 hover:bg-neutral-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer text-sm font-bold"
               >
                 ×
@@ -640,7 +636,7 @@ export default function HeroSection() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="font-mono font-bold text-white">${item.product.price * item.quantity}</span>
-                            <button 
+                            <button
                               onClick={() => removeFromCart(item.product.id)}
                               className="text-zinc-500 hover:text-red-500 cursor-pointer p-1"
                             >
@@ -656,7 +652,7 @@ export default function HeroSection() {
                       <span className="text-[#d4f82a] font-mono">${calculateTotal()}</span>
                     </div>
 
-                    <button 
+                    <button
                       onClick={() => setCheckoutStep('shipping')}
                       className="w-full py-2 bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wide rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-colors"
                     >
@@ -672,8 +668,8 @@ export default function HeroSection() {
                 <div className="space-y-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Full Name</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       required
                       placeholder="Jane Doe"
                       value={shippingName}
@@ -684,7 +680,7 @@ export default function HeroSection() {
 
                   <div className="flex flex-col gap-1">
                     <label className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Delivery Address</label>
-                    <textarea 
+                    <textarea
                       required
                       rows={2}
                       placeholder="Carter Road, Bandra East, Mumbai - 400050"
@@ -696,14 +692,14 @@ export default function HeroSection() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setCheckoutStep('cart')}
                     className="py-2 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-300 font-bold text-2xs uppercase tracking-wider"
                   >
                     Back to Bag
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     className="py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-2xs uppercase tracking-wider"
                   >

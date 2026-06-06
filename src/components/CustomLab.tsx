@@ -129,6 +129,8 @@ export default function CustomLab() {
     window.dispatchEvent(new CustomEvent('basketball-lights-update', { detail: eventDetail }));
   }, [ambientLightIntensity, dirLight1Enabled, dirLight1Intensity, dirLight2Enabled, dirLight2Intensity]);
 
+  // For performance/accessibility: stable label id used by aria-describedby.
+  const liveHudIdRef = useRef(`custom-lab-livehud-${Math.random().toString(16).slice(2)}`);
 
   const handleResetLab = () => {
     handleApplyPreset(PRESETS[0]);
@@ -366,11 +368,17 @@ export default function CustomLab() {
       <div className="flex-grow min-h-[450px] md:min-h-full flex flex-col items-center justify-end relative pointer-events-none px-4 py-8">
 
         {/* Real-time Material HUD Overlay */}
-        <div className="bg-gradient-to-t from-black/80 to-black/40 backdrop-blur-md border border-white/[0.08] rounded-[2rem] p-5 w-full max-w-sm mx-auto flex flex-col gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.6)]">
+        <div
+          className="bg-gradient-to-t from-black/80 to-black/40 backdrop-blur-md border border-white/[0.08] rounded-[2rem] p-5 w-full max-w-sm mx-auto flex flex-col gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+          role="region"
+          aria-label="Live Material HUD"
+          aria-describedby={liveHudIdRef.current}
+        >
            <div className="flex justify-between items-center pb-3 border-b border-white/[0.06]">
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><Activity size={12} className="text-orange-500" /> Live Material HUD</span>
               <span className="text-[9px] text-zinc-500 font-mono font-bold">{selectedPreset}</span>
            </div>
+           <p id={liveHudIdRef.current} className="sr-only">Updates as you change colors and sliders.</p>
            
            <div className="space-y-4 pt-1">
              <div className="flex flex-col gap-2">

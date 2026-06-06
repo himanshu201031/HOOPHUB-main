@@ -1,93 +1,156 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useEffect, useRef } from 'react';
+import { playSwoosh } from '../utils/audio';
 
-interface TrailDot {
-  id: number;
+interface Spark {
   x: number;
   y: number;
-  scale: number;
+  vx: number;
+  vy: number;
+  alpha: number;
+  size: number;
 }
 
 interface Ripple {
-  id: number;
   x: number;
   y: number;
+  radius: number;
+  maxRadius: number;
+  alpha: number;
+  rotation: number;
 }
 
 export default function BasketballCursor() {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [trail, setTrail] = useState<TrailDot[]>([]);
-  const [ripples, setRipples] = useState<Ripple[]>([]);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isClicking, setIsClicking] = useState(false);
-  const [isBallHovered, setIsBallHovered] = useState(false);
-  const [isCanvasHovered, setIsCanvasHovered] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-  
-  const trailRef = useRef<TrailDot[]>([]);
-  const trailCounter = useRef(0);
-  const requestRef = useRef<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const targetHoopRef = useRef<HTMLDivElement>(null);
+  const netOverlayRef = useRef<HTMLDivElement>(null);
+
   const targetPos = useRef({ x: -100, y: -100 });
   const currentPos = useRef({ x: -100, y: -100 });
+  
+  const sparks = useRef<Spark[]>([]);
+  const ripples = useRef<Ripple[]>([]);
+  
+  const isHovered = useRef(false);
+  const isClicking = useRef(false);
+  const isBallHovered = useRef(false);
+  const isVisible = useRef(false);
 
   useEffect(() => {
-    // Detect mouse move
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Handle Resize
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Mouse events
     const handleMouseMove = (e: MouseEvent) => {
       targetPos.current = { x: e.clientX, y: e.clientY };
-      if (!isVisible) setIsVisible(true);
-
-      // Check if mouse is hovering over empty canvas space
-      const target = e.target as HTMLElement;
-      if (target) {
-        const isOverMainCanvas = 
-          target === document.body || 
-          target === document.documentElement ||
-          target.id === 'landing-app-root' ||
-          target.id === 'main-content-timeline' ||
-          !target.closest('button, a, input, select, textarea, [role="button"], label, nav, footer, .p-1, .p-2, .p-3, .p-4, .p-5, .p-6, .p-8, .bg-neutral-900, .bg-neutral-950, .bg-neutral-900\\/5, .rounded-xl, .rounded-2xl, .rounded-3xl');
-        
-        setIsCanvasHovered(isOverMainCanvas);
+      if (!isVisible.current) {
+        isVisible.current = true;
+        if (containerRef.current) containerRef.current.style.opacity = '1';
       }
 
-      // Add trailing spark
-      if (Math.random() > 0.45) {
-        trailCounter.current += 1;
-        const newDot: TrailDot = {
-          id: trailCounter.current,
+      // Add sparks dynamically on movement
+      if (Math.random() > 0.4) {
+        sparks.current.push({
           x: e.clientX,
           y: e.clientY,
-          scale: 1.0 + Math.random() * 0.8,
-        };
-        trailRef.current = [...trailRef.current.slice(-12), newDot];
-        setTrail(trailRef.current);
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: (Math.random() - 0.5) * 1.5,
+          alpha: 1.0,
+          size: 1.5 + Math.random() * 2.0
+        });
       }
     };
 
-    const handleMouseEnter = () => setIsVisible(true);
-    const handleMouseLeave = () => setIsVisible(false);
-    
-    const handleMouseDown = (e: MouseEvent) => {
-      setIsClicking(true);
-      
-      const newRipple: Ripple = {
-        id: Date.now() + Math.random(),
-        x: e.clientX,
-        y: e.clientY
-      };
-      
-      setRipples(prev => [...prev.slice(-4), newRipple]);
+    const handleMouseEnter = () => {
+      isVisible.current = true;
+      if (containerRef.current) containerRef.current.style.opacity = '1';
     };
 
-    const handleMouseUp = () => setIsClicking(false);
+    const handleMouseLeave = () => {
+      isVisible.current = false;
+      if (containerRef.current) containerRef.current.style.opacity = '0';
+    };
 
-    // Dynamic hover bindings for interactive links, buttons, dials, option values
-    const setupIntersections = () => {
+    const handleMouseDown = (e: MouseEvent) => {
+      isClicking.current = true;
+      playSwoosh();
+
+      // Trigger a court ripple
+      ripples.current.push({
+        x: e.clientX,
+        y: e.clientY,
+        radius: 4,
+        maxRadius: 65,
+        alpha: 0.9,
+        rotation: Math.random() * Math.PI
+      });
+
+      updateCursorStyles();
+    };
+
+    const handleMouseUp = () => {
+      isClicking.current = false;
+      updateCursorStyles();
+    };
+
+    // Listen to custom Three.js raycasting hovers
+    const handle3D_BallHover = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent && customEvent.detail) {
+        isBallHovered.current = !!customEvent.detail.hovered;
+        updateCursorStyles();
+      }
+    };
+
+    // Update active visual styles on cursor elements
+    const updateCursorStyles = () => {
+      const cursor = cursorRef.current;
+      const hoop = targetHoopRef.current;
+      const net = netOverlayRef.current;
+      if (!cursor) return;
+
+      const hovered = isHovered.current || isBallHovered.current;
+      let scale = 1.0;
+      if (isClicking.current) scale = 0.82;
+      else if (hovered) scale = 1.35;
+
+      cursor.style.transform = `translate(-50%, -50%) scale(${scale})`;
+
+      if (hoop) {
+        hoop.style.transform = `translate(-50%, -50%) scale(${hovered ? 1.15 : 0.0})`;
+        hoop.style.opacity = hovered ? '0.9' : '0';
+      }
+
+      if (net) {
+        net.style.opacity = hovered ? '1' : '0';
+      }
+    };
+
+    // Check hovered elements
+    const checkHover = () => {
       const interactives = document.querySelectorAll(
         'button, a, input, select, textarea, [role="button"], [data-cursor-hover]'
       );
-      
-      const onEnter = () => setIsHovered(true);
-      const onLeave = () => setIsHovered(false);
+
+      const onEnter = () => {
+        isHovered.current = true;
+        updateCursorStyles();
+      };
+      const onLeave = () => {
+        isHovered.current = false;
+        updateCursorStyles();
+      };
 
       interactives.forEach((el) => {
         el.addEventListener('mouseenter', onEnter);
@@ -102,14 +165,6 @@ export default function BasketballCursor() {
       };
     };
 
-    // Listen to custom Three.js raycasting hovers over the 3D ball
-    const handle3D_BallHover = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent && customEvent.detail) {
-        setIsBallHovered(!!customEvent.detail.hovered);
-      }
-    };
-
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseenter', handleMouseEnter);
     window.addEventListener('mouseleave', handleMouseLeave);
@@ -117,36 +172,117 @@ export default function BasketballCursor() {
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('3d-ball-hover', handle3D_BallHover);
 
-    // Initial setup
-    const cleanInteractives = setupIntersections();
+    let cleanInteractives = checkHover();
+    const interval = setInterval(() => {
+      cleanInteractives();
+      cleanInteractives = checkHover();
+    }, 2000);
 
-    // Secondary periodic setup in case DOM updates (e.g. view changes)
-    const interval = setInterval(setupIntersections, 2000);
+    // Main animation loop (optimized standard loop)
+    let animationFrameId: number;
 
-    // Smooth physics lerp loop
-    const updateCursor = () => {
+    const render = () => {
+      // Lerp mouse coordinates
       const dx = targetPos.current.x - currentPos.current.x;
       const dy = targetPos.current.y - currentPos.current.y;
-      
-      // Slower, smooth floating spring-like lag
-      currentPos.current.x += dx * 0.16;
-      currentPos.current.y += dy * 0.16;
-      
-      setPosition({ x: currentPos.current.x, y: currentPos.current.y });
+      currentPos.current.x += dx * 0.18;
+      currentPos.current.y += dy * 0.18;
 
-      // Decay trails over time
-      if (trailRef.current.length > 0) {
-        trailRef.current = trailRef.current
-          .map(dot => ({ ...dot, scale: dot.scale - 0.08 }))
-          .filter(dot => dot.scale > 0);
-        setTrail(trailRef.current);
+      // Update positions of DOM cursor elements
+      if (cursorRef.current) {
+        cursorRef.current.style.left = `${currentPos.current.x}px`;
+        cursorRef.current.style.top = `${currentPos.current.y}px`;
+      }
+      if (targetHoopRef.current) {
+        targetHoopRef.current.style.left = `${currentPos.current.x}px`;
+        targetHoopRef.current.style.top = `${currentPos.current.y}px`;
+      }
+      if (netOverlayRef.current) {
+        netOverlayRef.current.style.left = `${currentPos.current.x}px`;
+        netOverlayRef.current.style.top = `${currentPos.current.y}px`;
       }
 
-      requestRef.current = requestAnimationFrame(updateCursor);
+      // Draw trails on Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // A. Draw Sparks
+      for (let i = sparks.current.length - 1; i >= 0; i--) {
+        const spark = sparks.current[i];
+        spark.x += spark.vx;
+        spark.y += spark.vy;
+        spark.alpha -= 0.04;
+
+        if (spark.alpha <= 0) {
+          sparks.current.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = spark.alpha;
+        ctx.fillStyle = '#f97316';
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = '#ff5500';
+        ctx.beginPath();
+        ctx.arc(spark.x, spark.y, spark.size * spark.alpha, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // B. Draw Ripples
+      for (let i = ripples.current.length - 1; i >= 0; i--) {
+        const ripple = ripples.current[i];
+        ripple.radius += (ripple.maxRadius - ripple.radius) * 0.08;
+        ripple.alpha -= 0.025;
+        ripple.rotation += 0.01;
+
+        if (ripple.alpha <= 0) {
+          ripples.current.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = ripple.alpha;
+        ctx.translate(ripple.x, ripple.y);
+
+        // 1. Outer rim
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(249, 115, 22, 0.6)';
+        ctx.beginPath();
+        ctx.arc(0, 0, ripple.radius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 2. Dashed inner court grid
+        ctx.save();
+        ctx.rotate(ripple.rotation);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.max(2, ripple.radius - 8), 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // 3. Center target hoop
+        ctx.fillStyle = 'rgba(249, 115, 22, 0.1)';
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.min(ripple.radius * 0.25, 8), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      animationFrameId = requestAnimationFrame(render);
     };
-    requestRef.current = requestAnimationFrame(updateCursor);
+
+    render();
 
     return () => {
+      window.removeEventListener('resize', resizeCanvas);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseenter', handleMouseEnter);
       window.removeEventListener('mouseleave', handleMouseLeave);
@@ -155,102 +291,64 @@ export default function BasketballCursor() {
       window.removeEventListener('3d-ball-hover', handle3D_BallHover);
       cleanInteractives();
       clearInterval(interval);
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      cancelAnimationFrame(animationFrameId);
     };
-  }, [isVisible]);
-
-  // Clean stale click ripples after their 1s fade action completes
-  const onRippleComplete = (id: number) => {
-    setRipples(prev => prev.filter(r => r.id !== id));
-  };
-
-  if (!isVisible) return null;
-
-  const isAnyHovered = isHovered || isBallHovered;
+  }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-[100000] hidden md:block">
-      
-      {/* 1. SEAMLESS TRAILING SPARKS (KINETIC DOTS) */}
-      {trail.map((dot) => (
-        <div
-          key={dot.id}
-          style={{
-            position: 'absolute',
-            left: dot.x,
-            top: dot.y,
-            transform: `translate(-50%, -50%) scale(${dot.scale})`,
-            opacity: dot.scale,
-          }}
-          className="w-1.5 h-1.5 bg-orange-500 rounded-full mix-blend-screen shadow-[0_0_6px_#ff5500] transition-opacity duration-100"
-        />
-      ))}
+    <div
+      ref={containerRef}
+      style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
+      className="fixed inset-0 pointer-events-none z-[100000] hidden md:block"
+    >
+      {/* HTML5 Canvas overlay for hyper-efficient rendering of sparks and ripples */}
+      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
 
-      {/* 2. DYNAMIC COURT RIPPLES ON CLICK */}
-      <AnimatePresence>
-        {ripples.map((rip) => (
-          <motion.div
-            key={rip.id}
-            initial={{ scale: 0.1, opacity: 0.9 }}
-            animate={{ scale: 2.4, opacity: 0 }}
-            onAnimationComplete={() => onRippleComplete(rip.id)}
-            transition={{ duration: 0.8, ease: [0.1, 0.8, 0.25, 1] }}
-            style={{
-              position: 'absolute',
-              left: rip.x,
-              top: rip.y,
-              transform: 'translate(-50%, -50%)',
-            }}
-            className="w-16 h-16 pointer-events-none flex items-center justify-center mix-blend-screen"
-          >
-            {/* Outer expanding orange circle rim */}
-            <div className="absolute inset-0 border-2 border-orange-500 rounded-full shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
-            {/* Inner dashed tactical court grid lines */}
-            <div className="absolute inset-2 border border-dashed border-orange-400/60 rounded-full animate-[spin_5s_linear_infinite]" />
-            {/* Center target circle representing the bottom of the hoop */}
-            <div className="absolute w-4 h-4 rounded-full border border-amber-500/40 bg-orange-500/10" />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-
-      {/* 3. THE MAIN BASKETBALL MOUSE CURSOR & HOOP TARGET LOBBY */}
+      {/* Dynamic target hoop dashed spinner when hovering clickable elements */}
       <div
+        ref={targetHoopRef}
         style={{
-          position: 'absolute',
-          left: position.x,
-          top: position.y,
-          transform: `translate(-50%, -50%) scale(${isClicking ? 0.82 : isAnyHovered ? 1.35 : 1.0})`,
+          opacity: 0,
+          transform: 'translate(-50%, -50%) scale(0)'
         }}
-        className="w-5.5 h-5.5 flex items-center justify-center pointer-events-none transition-transform duration-100 ease-out"
+        className="absolute w-12 h-12 border-2 border-dashed border-orange-500/80 rounded-full animate-[spin_12s_linear_infinite] transition-all duration-300 pointer-events-none"
+      />
+
+      {/* Outer net pattern glow overlay */}
+      <div
+        ref={netOverlayRef}
+        style={{
+          opacity: 0,
+          transform: 'translate(-50%, -50%)'
+        }}
+        className="absolute w-9 h-9 border border-zinc-500/30 rounded-full bg-orange-500/5 backdrop-blur-[0.5px] transition-all duration-300 animate-pulse pointer-events-none"
+      />
+
+      {/* The main basketball cursor DOM node */}
+      <div
+        ref={cursorRef}
+        style={{
+          transform: 'translate(-50%, -50%) scale(1)'
+        }}
+        className="absolute w-6 h-6 flex items-center justify-center pointer-events-none transition-transform duration-100 ease-out"
       >
-        {/* Flat Vector Basketball SVG */}
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_2px_5px_rgba(234,88,12,0.7)] animate-[spin_4s_linear_infinite]">
-          {/* Base basketball leather circle */}
+        <svg
+          viewBox="0 0 100 100"
+          className="w-full h-full drop-shadow-[0_2px_5px_rgba(234,88,12,0.7)] animate-[spin_4s_linear_infinite]"
+        >
+          {/* Base basketball leather */}
           <circle cx="50" cy="50" r="44" fill="#f97316" stroke="#000000" strokeWidth="6.5" />
-          {/* Authentic black seams crosslines */}
+          {/* Seams */}
           <path d="M 6 50 H 94" stroke="#000000" strokeWidth="6.5" />
           <path d="M 50 6 V 94" stroke="#000000" strokeWidth="6.5" />
           <path d="M 18 18 Q 45 45 18 82" fill="none" stroke="#000000" strokeWidth="6.5" />
           <path d="M 82 18 Q 55 45 82 82" fill="none" stroke="#000000" strokeWidth="6.5" />
-          {/* Highlights & gloss dome sheen */}
+          {/* Dome shine highlighting */}
           <path d="M 28 18 A 28 28 0 0 1 72 18" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="4.5" />
+          {/* Central pointer dot for exact alignment click */}
+          <circle cx="50" cy="50" r="4.5" fill="#ffffff" />
         </svg>
-
-        {/* Dynamic target hoop dashed spinner when hovering clickable keys */}
-        <div
-          style={{
-            transform: `translate(-50%, -50%) scale(${isAnyHovered ? 1.15 : 0.0})`,
-            opacity: isAnyHovered ? 0.9 : 0,
-          }}
-          className="absolute left-1/2 top-1/2 w-11 h-11 border-2 border-dashed border-orange-500/80 rounded-full animate-[spin_12s_linear_infinite] transition-all duration-300"
-        />
-
-        {/* Outer subtle net mesh pattern layer on hover */}
-        {isAnyHovered && (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 border border-zinc-500/30 rounded-full bg-orange-500/5 backdrop-blur-[0.5px] transition-all duration-300 animate-pulse" />
-        )}
       </div>
-
     </div>
   );
 }

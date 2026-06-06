@@ -401,8 +401,11 @@ export default function ThreeCanvas() {
       if (config.autoSpinY !== undefined) currentConfig.autoSpinY = config.autoSpinY;
       if (config.ballScaleMultiplier !== undefined) currentConfig.ballScaleMultiplier = config.ballScaleMultiplier;
 
-      // Re-trigger visual drawing
-      drawBasketballTextures(currentConfig);
+      // Re-trigger visual drawing only if color inputs are changed to avoid massive drawing lags on physics sliders
+      const colorsUpdated = config.baseColor || config.pebbleColor || config.specColor || config.seamColor || config.lipColor;
+      if (colorsUpdated) {
+        drawBasketballTextures(currentConfig);
+      }
 
       // Trigger material updates
       if (basketballMat) {

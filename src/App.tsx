@@ -10,6 +10,7 @@ import HeroSection from './components/HeroSection';
 import StatsSection from './components/StatsSection';
 import HowItWorks from './components/HowItWorks';
 import Footer from './components/Footer';
+import ScrollVelocityTicker from './components/ScrollVelocityTicker';
 
 // Basketball interactive custom preloader & cursor overlays
 import BasketballLoader from './components/BasketballLoader';
@@ -101,6 +102,9 @@ export default function App() {
           <>
             {/* SECTION 1 - HERO CAPABILITIES & LIQUID CARD */}
             <HeroSection />
+
+            {/* SCROLL VELOCITY TICKER - dynamic marquee between hero & stats */}
+            <ScrollVelocityTicker className="pointer-events-none" />
 
             {/* SECTION 2 - STATISTICS INTERACTIVES */}
             <StatsSection />

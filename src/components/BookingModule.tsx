@@ -255,8 +255,12 @@ export default function BookingModule() {
     const matchesType = filterType === 'all' ? true : court.type === filterType;
     const matchesTurf = filterTurf === 'all' ? true : court.turf === filterTurf;
     const matchesSearch = court.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          court.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesTurf && matchesSearch;
+                          court.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          court.turf.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesParking = !filterParking || !!court.hasParking;
+    const matchesShowers = !filterShowers || !!court.hasShowers;
+    const matchesLockers = !filterLockers || !!court.hasLockers;
+    return matchesType && matchesTurf && matchesSearch && matchesParking && matchesShowers && matchesLockers;
   });
 
   return (

@@ -252,39 +252,7 @@ export default function HeroSection() {
       {/* STYLISH ORANGE BACKLIGHT SHADOW FOR 3D SENSATION */}
       <div className="absolute top-[48%] left-[50%] -translate-x-[50%] -translate-y-[50%] w-[50vh] h-[50vh] rounded-full bg-orange-600/10 z-0 pointer-events-none blur-[95px]" />
 
-      {/* ── BOTTOM-LEFT: CircularText + Info Stack ─────────────────────── */}
-      <div className="absolute bottom-10 left-6 md:left-10 z-30 flex items-end gap-4 pointer-events-auto">
-
-        {/* CircularText spinning ring */}
-        <div className="relative w-[90px] h-[90px] flex-shrink-0">
-          <CircularText
-            text="HOOPHUB★STREETBALL★PHYSICS★"
-            spinDuration={14}
-            onHover="speedUp"
-            className="text-orange-500/70"
-          />
-          {/* Center basketball icon */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-2xl animate-[spin_4s_linear_infinite] drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]">🏀</span>
-          </div>
-        </div>
-
-        {/* Stacked micro info cards */}
-        <div className="flex flex-col gap-2 mb-1">
-          <div className="hero-sub-tag flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/[0.07] px-3 py-2 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399] animate-pulse flex-shrink-0" />
-            <span className="text-[9px] font-black font-mono text-zinc-300 uppercase tracking-widest">24,000+ Active Players</span>
-          </div>
-          <div className="hero-sub-tag flex items-center gap-2 bg-black/60 backdrop-blur-md border border-orange-500/[0.15] px-3 py-2 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <span className="text-orange-400 text-[11px]">🏟</span>
-            <span className="text-[9px] font-black font-mono text-zinc-300 uppercase tracking-widest">340+ Courts Mapped</span>
-          </div>
-          <div className="hero-sub-tag flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/[0.06] px-3 py-2 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <span className="text-[#d4f82a] text-[11px]">⚡</span>
-            <span className="text-[9px] font-black font-mono text-zinc-300 uppercase tracking-widest">Real-Time Lab Physics</span>
-          </div>
-        </div>
-      </div>
+     
 
       {/* BRIGHT GLOWING SILHOUETTE REMOVED AT USER REQUEST FOR CENTERED 3D VIEW */}
 

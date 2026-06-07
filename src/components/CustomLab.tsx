@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Target, Contrast, RotateCcw, BoxSelect, Maximize, Orbit, Palette, Zap, Activity, Sun, SunDim, Save, Download, Upload, Shuffle, Copy, Share2 } from 'lucide-react';
+import { Target, Contrast, RotateCcw, BoxSelect, Maximize, Orbit, Palette, Zap, Activity, Sun, SunDim, Download, Upload, Shuffle, Share2 } from 'lucide-react';
 import { playMetallicClick, playSwoosh } from '../utils/audio';
 
 interface ExportConfig {
@@ -374,21 +374,56 @@ export default function CustomLab() {
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            {PRESETS.map((p) => (
-              <button
-                key={p.name}
-                onClick={() => handleApplyPreset(p)}
-                className={`py-3 px-4 rounded-2xl text-left border text-[11px] font-bold uppercase tracking-wide transition-all duration-300 ${
-                  selectedPreset === p.name
-                    ? 'bg-orange-500/10 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(234,88,12,0.15)]'
-                    : 'bg-black/40 border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-white hover:-translate-y-0.5'
-                }`}
-              >
-                {p.name}
-              </button>
-            ))}
-          </div>
-        </div>
+{PRESETS.map((p) => (
+               <button
+                 key={p.name}
+                 onClick={() => handleApplyPreset(p)}
+                 className={`py-3 px-4 rounded-2xl text-left border text-[11px] font-bold uppercase tracking-wide transition-all duration-300 ${
+                   selectedPreset === p.name
+                     ? 'bg-orange-500/10 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(234,88,12,0.15)]'
+                     : 'bg-black/40 border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-white hover:-translate-y-0.5'
+                 }`}
+               >
+                 {p.name}
+               </button>
+             ))}
+           </div>
+           
+           <div className="grid grid-cols-3 gap-2 mt-4">
+             <button
+               onClick={handleRandomize}
+               className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200 cursor-pointer"
+               title="Generate Random Configuration"
+             >
+               <Shuffle size={14} className="text-orange-500" />
+               Random
+             </button>
+             <button
+               onClick={handleExport}
+               className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200 cursor-pointer"
+               title="Export Configuration"
+             >
+               <Download size={14} className="text-orange-500" />
+               Export
+             </button>
+             <button
+               onClick={handleImport}
+               className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200 cursor-pointer"
+               title="Import Configuration"
+             >
+               <Upload size={14} className="text-orange-500" />
+               Import
+             </button>
+             <button
+               onClick={handleShare}
+               className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200 cursor-pointer col-span-3"
+               title="Share Configuration"
+             >
+               <Share2 size={14} className="text-orange-500" />
+               {showCopied ? 'Link Copied!' : 'Share'}
+             </button>
+           </div>
+         </div>
 
         {/* Material Tactility Series Panel */}
         <div className="bg-gradient-to-br from-neutral-900/90 to-[#0e0e0f]/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">

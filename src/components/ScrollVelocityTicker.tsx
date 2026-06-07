@@ -13,7 +13,7 @@ const DEFAULT_ITEMS = [
 
 export default function ScrollVelocityTicker({
   items = DEFAULT_ITEMS,
-  baseSpeed = 0.7,
+  baseSpeed = 5,
   className = ''
 }: ScrollVelocityTickerProps) {
   const trackRef = useRef<HTMLDivElement>(null);

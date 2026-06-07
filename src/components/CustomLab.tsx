@@ -425,30 +425,30 @@ export default function CustomLab() {
            </div>
          </div>
  
-         {/* Material Tactility Series Panel */}
-        <div className="bg-gradient-to-br from-neutral-900/90 to-[#0e0e0f]/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
-          <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/[0.06]">
-            <Zap size={18} className="text-orange-500 animate-[pulse_2s_infinite]" />
-            <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Tactility Series</h3>
-          </div>
-          
-          <div className="space-y-3">
+{/* Material Tactility Series Panel */}
+         <div className="bg-gradient-to-br from-neutral-900/90 to-[#0e0e0f]/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+           <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/[0.06]">
+             <Zap size={18} className="text-orange-500 animate-[pulse_2s_infinite]" />
+             <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Tactility Series</h3>
+           </div>
+           
+           <div className="space-y-3">
              {TACTILITY_PRESETS.map((tact) => (
-                <button
-                  key={tact.name}
-                  onClick={() => handleApplyTactility(tact)}
-                  className={`w-full p-4 rounded-2xl text-left border flex flex-col gap-1 transition-all duration-300 pointer-events-auto cursor-pointer ${
-                    selectedTactility === tact.name
-                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(234,88,12,0.15)]'
-                      : 'bg-black/40 border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-white hover:-translate-y-0.5'
-                  }`}
-                >
-                  <span className="text-[11.5px] font-black uppercase tracking-wider">{tact.name}</span>
-                  <p className="text-[9.5px] text-zinc-400 font-sans tracking-tight leading-normal font-medium">{tact.desc}</p>
-                </button>
+               <button
+                 key={tact.name}
+                 onClick={() => handleApplyTactility(tact)}
+                 className={`w-full p-4 rounded-2xl text-left border flex flex-col gap-1 transition-all duration-300 pointer-events-auto cursor-pointer ${
+                   selectedTactility === tact.name
+                     ? 'bg-orange-500/10 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(234,88,12,0.15)]'
+                     : 'bg-black/40 border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-white hover:-translate-y-0.5'
+                   }`}
+               >
+                 <span className="text-[11.5px] font-black uppercase tracking-wider">{tact.name}</span>
+                 <p className="text-[9.5px] text-zinc-400 font-sans tracking-tight leading-normal font-medium">{tact.desc}</p>
+               </button>
              ))}
-          </div>
-        </div>
+           </div>
+         </div>
 
         {/* Color Tuning Panel */}
         <div className="bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">

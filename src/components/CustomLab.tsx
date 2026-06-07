@@ -363,18 +363,18 @@ export default function CustomLab() {
               <BoxSelect size={18} className="text-orange-500" />
               <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Base Presets</h3>
             </div>
-            <button
-              onClick={handleResetLab}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-[9.5px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/20 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto transition-all duration-200"
-              title="Reset Lab to Wilson Classic"
-            >
-              <RotateCcw size={10} className="text-orange-500" />
-              Reset Lab
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-{PRESETS.map((p) => (
+<button
+               onClick={handleResetLab}
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-[9.5px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/20 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto transition-all duration-200"
+               title="Reset Lab to Wilson Classic"
+             >
+               <RotateCcw size={10} className="text-orange-500" />
+               Reset Lab
+             </button>
+           </div>
+           
+           <div className="grid grid-cols-2 gap-3">
+             {PRESETS.map((p) => (
                <button
                  key={p.name}
                  onClick={() => handleApplyPreset(p)}
@@ -424,8 +424,8 @@ export default function CustomLab() {
              </button>
            </div>
          </div>
-
-        {/* Material Tactility Series Panel */}
+ 
+         {/* Material Tactility Series Panel */}
         <div className="bg-gradient-to-br from-neutral-900/90 to-[#0e0e0f]/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
           <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/[0.06]">
             <Zap size={18} className="text-orange-500 animate-[pulse_2s_infinite]" />

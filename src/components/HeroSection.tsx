@@ -151,6 +151,7 @@ export default function HeroSection() {
     const updated = [newBooking, ...bookings];
     saveBookings(updated);
     playSwoosh();
+    setIsPanelOpen(false); // Close panel after booking
   };
 
   const handleCancelBooking = (bId: string) => {
@@ -175,6 +176,9 @@ export default function HeroSection() {
     saveTeammates(updated);
     setNewTeammateName('');
     playSwoosh();
+    setTimeout(() => {
+      setIsPanelOpen(false); // Close panel after adding teammate
+    }, 300);
   };
 
   const handleInviteTeammate = (id: string) => {
@@ -262,53 +266,63 @@ export default function HeroSection() {
       {/* FLOAT INTERACTIVE SLIDING CONTROL DRAWER FOR APP CAPABILITIES */}
       {isPanelOpen && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[9990] flex items-center justify-start anim-fade-in pointer-events-auto">
-          <div className="w-full max-w-lg h-full bg-[#0d0d0e] border-r border-white/[0.08] shadow-2xl p-6 md:p-8 flex flex-col justify-between space-y-6 relative overflow-y-auto">
+          <div className="w-full max-w-lg h-full bg-gradient-to-b from-[#0d0d0e] via-[#0a0a0b] to-[#0d0d0e] border-r border-orange-500/10 shadow-[0_0_60px_rgba(255,107,53,0.08)] p-6 md:p-8 flex flex-col justify-between space-y-6 relative overflow-y-auto">
+            {/* Subtle accent grid backdrop */}
+            <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[radial-gradient(#ff6b35_1px,transparent_1px)] [background-size:18px_18px]" />
+
+            {/* Top accent line */}
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
+
             {/* Close button */}
             <button
               onClick={() => { playMetallicClick(); setIsPanelOpen(false); }}
-              className="absolute top-5 right-5 w-9 h-9 rounded-full bg-neutral-900 hover:bg-neutral-800 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors shadow"
+              className="absolute top-5 right-5 w-9 h-9 rounded-full bg-neutral-900 hover:bg-orange-600/20 hover:border-orange-500/40 border border-white/5 text-zinc-400 hover:text-orange-400 flex items-center justify-center cursor-pointer transition-all duration-200 shadow hover:rotate-90"
             >
               <X size={18} />
             </button>
 
             {/* Drawer Heading details */}
-            <div className="space-y-1">
+            <div className="space-y-2 relative">
               <div className="flex items-center gap-1.5 text-[8.5px] font-mono tracking-widest text-[#d4f82a] font-black uppercase">
-                <Sparkles size={11} /> Kyoto Metropolitan Hub
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4f82a] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#d4f82a]"></span>
+                </span>
+                Kyoto Metropolitan Hub
               </div>
-              <h2 className="font-display text-white text-2xl font-black uppercase tracking-wider">
-                Court Command Center
+              <h2 className="font-display text-white text-[1.7rem] leading-[1.1] font-black uppercase tracking-wider">
+                Court Command <span className="text-orange-500">Center</span>
               </h2>
-              <p className="text-xs text-zinc-400 font-normal leading-relaxed">
+              <p className="text-[11px] text-zinc-400 font-normal leading-relaxed">
                 Unlock active court reservations, equipment purchase bins, and matching street teammates near Carter Road.
               </p>
             </div>
 
             {/* Inner Tabs navigation */}
-            <div className="grid grid-cols-3 bg-neutral-900/60 p-1 rounded-xl border border-white/5 relative z-10">
+            <div className="grid grid-cols-3 bg-neutral-900/80 p-1 rounded-xl border border-white/5 relative z-10 shadow-inner">
               <button
                 onClick={() => { playMetallicClick(); setActiveTab('shop'); }}
-                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${activeTab === 'shop'
-                    ? 'bg-white text-black font-extrabold shadow'
-                    : 'text-zinc-500 hover:text-white'
+                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'shop'
+                    ? 'bg-gradient-to-b from-white to-zinc-200 text-black font-extrabold shadow-[0_0_18px_rgba(255,255,255,0.25)] scale-[1.02]'
+                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
                   }`}
               >
                 Shop Gear
               </button>
               <button
                 onClick={() => { playMetallicClick(); setActiveTab('booking'); }}
-                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${activeTab === 'booking'
-                    ? 'bg-white text-black font-extrabold shadow'
-                    : 'text-zinc-500 hover:text-white'
+                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'booking'
+                    ? 'bg-gradient-to-b from-white to-zinc-200 text-black font-extrabold shadow-[0_0_18px_rgba(255,255,255,0.25)] scale-[1.02]'
+                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
                   }`}
               >
                 Book Court
               </button>
               <button
                 onClick={() => { playMetallicClick(); setActiveTab('match'); }}
-                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-150 ${activeTab === 'match'
-                    ? 'bg-white text-black font-extrabold shadow'
-                    : 'text-zinc-500 hover:text-white'
+                className={`py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${activeTab === 'match'
+                    ? 'bg-gradient-to-b from-white to-zinc-200 text-black font-extrabold shadow-[0_0_18px_rgba(255,255,255,0.25)] scale-[1.02]'
+                    : 'text-zinc-500 hover:text-white hover:bg-white/5'
                   }`}
               >
                 Teammates

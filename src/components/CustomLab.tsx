@@ -357,15 +357,15 @@ export default function CustomLab() {
       <div className="w-full md:w-[400px] flex-shrink-0 space-y-6 pointer-events-auto">
         
         {/* Presets Panel */}
-        <div className="bg-gradient-to-br from-neutral-900/90 to-[#0e0e0f]/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+        <div className="bg-gradient-to-br from-[#121214] to-[#0a0a0b] border border-orange-500/10 p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:border-orange-500/20 transition-all duration-300">
           <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
-              <BoxSelect size={18} className="text-orange-500" />
-              <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Base Presets</h3>
+              <BoxSelect size={18} className="text-orange-500 animate-[pulse_2.5s_infinite]" />
+              <h3 className="font-display text-white text-sm font-black uppercase tracking-widest font-mono">Base Presets</h3>
             </div>
-<button
+            <button
                onClick={handleResetLab}
-               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-[9.5px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/20 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto transition-all duration-200"
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/15 hover:border-orange-500/30 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto transition-all duration-200"
                title="Reset Lab to Wilson Classic"
              >
                <RotateCcw size={10} className="text-orange-500" />
@@ -378,9 +378,9 @@ export default function CustomLab() {
                <button
                  key={p.name}
                  onClick={() => handleApplyPreset(p)}
-                 className={`py-3 px-4 rounded-2xl text-left border text-[11px] font-bold uppercase tracking-wide transition-all duration-300 ${
+                 className={`py-3 px-4 rounded-2xl text-left border text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${
                    selectedPreset === p.name
-                     ? 'bg-orange-500/10 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(234,88,12,0.15)]'
+                     ? 'bg-orange-500/15 text-orange-400 border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.2)] scale-[1.02]'
                      : 'bg-black/40 border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-white hover:-translate-y-0.5'
                  }`}
                >
@@ -392,7 +392,7 @@ export default function CustomLab() {
            <div className="grid grid-cols-3 gap-2 mt-4">
              <button
                onClick={handleRandomize}
-               className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[10px] font-bold uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/10 hover:border-orange-500/30 transition-all duration-200 cursor-pointer"
+               className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[10px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-orange-500/15 hover:border-orange-500/30 transition-all duration-200 cursor-pointer hover:scale-[1.03] active:scale-95"
                title="Generate Random Configuration"
              >
                <Shuffle size={14} className="text-orange-500" />
@@ -423,94 +423,94 @@ export default function CustomLab() {
                {showCopied ? 'Link Copied!' : 'Share'}
              </button>
            </div>
-         </div>
- 
-{/* Material Tactility Series Panel */}
-         <div className="bg-gradient-to-br from-neutral-900/90 to-[#0e0e0f]/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
-           <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/[0.06]">
-             <Zap size={18} className="text-orange-500 animate-[pulse_2s_infinite]" />
-             <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Tactility Series</h3>
+</div>
+   
+          {/* Material Tactility Series Panel */}
+          <div className="bg-gradient-to-br from-[#121214] to-[#0a0a0b] border border-orange-500/10 p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:border-orange-500/20 transition-all duration-300">
+            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/[0.06]">
+              <Zap size={18} className="text-orange-500 animate-[pulse_1.8s_infinite]" />
+              <h3 className="font-display text-white text-sm font-black uppercase tracking-widest font-mono">Tactility Series</h3>
+            </div>
+            
+            <div className="space-y-3">
+              {TACTILITY_PRESETS.map((tact) => (
+                <button
+                  key={tact.name}
+                  onClick={() => handleApplyTactility(tact)}
+                  className={`w-full p-4 rounded-2xl text-left border flex flex-col gap-1 transition-all duration-300 pointer-events-auto cursor-pointer hover:scale-[1.01] ${
+                    selectedTactility === tact.name
+                      ? 'bg-orange-500/15 text-orange-400 border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.15)]'
+                      : 'bg-black/40 border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-white hover:-translate-y-0.5'
+                    }`}
+                >
+                  <span className="text-[11.5px] font-black uppercase tracking-wider">{tact.name}</span>
+                  <p className="text-[9.5px] text-zinc-400 font-sans tracking-tight leading-normal font-medium">{tact.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Color Tuning Panel */}
+         <div className="bg-gradient-to-br from-[#121214] to-[#0a0a0b] border border-orange-500/10 p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:border-orange-500/20 transition-all duration-300">
+           <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/[0.06]">
+             <Palette size={18} className="text-orange-500" />
+             <h3 className="font-display text-white text-sm font-black uppercase tracking-widest font-mono">Pigment Mapping</h3>
            </div>
            
-           <div className="space-y-3">
-             {TACTILITY_PRESETS.map((tact) => (
-               <button
-                 key={tact.name}
-                 onClick={() => handleApplyTactility(tact)}
-                 className={`w-full p-4 rounded-2xl text-left border flex flex-col gap-1 transition-all duration-300 pointer-events-auto cursor-pointer ${
-                   selectedTactility === tact.name
-                     ? 'bg-orange-500/10 text-orange-400 border-orange-500/30 shadow-[0_0_15px_rgba(234,88,12,0.15)]'
-                     : 'bg-black/40 border-white/[0.06] text-zinc-400 hover:bg-white/[0.04] hover:text-white hover:-translate-y-0.5'
-                   }`}
-               >
-                 <span className="text-[11.5px] font-black uppercase tracking-wider">{tact.name}</span>
-                 <p className="text-[9.5px] text-zinc-400 font-sans tracking-tight leading-normal font-medium">{tact.desc}</p>
-               </button>
-             ))}
+           <div className="space-y-4">
+             <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl hover:border-orange-500/20 transition-all">
+               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Base Leather</span>
+               <div className="flex items-center gap-3">
+                 <span className="font-mono text-[10px] text-zinc-500 uppercase">{baseColor}</span>
+                 <input
+                   type="color"
+                   value={baseColor}
+                   onChange={(e) => handleColorChange('baseColor', e.target.value)}
+                   className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none hover:scale-110 transition-transform"
+                 />
+               </div>
+             </div>
+
+             <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl hover:border-orange-500/20 transition-all">
+               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Pebble Core</span>
+               <div className="flex items-center gap-3">
+                 <span className="font-mono text-[10px] text-zinc-500 uppercase">{pebbleColor}</span>
+                 <input
+                   type="color"
+                   value={pebbleColor}
+                   onChange={(e) => handleColorChange('pebbleColor', e.target.value)}
+                   className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none hover:scale-110 transition-transform"
+                 />
+               </div>
+             </div>
+
+             <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl hover:border-orange-500/20 transition-all">
+               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Rubber Seams</span>
+               <div className="flex items-center gap-3">
+                 <span className="font-mono text-[10px] text-zinc-500 uppercase">{seamColor}</span>
+                 <input
+                   type="color"
+                   value={seamColor}
+                   onChange={(e) => handleColorChange('seamColor', e.target.value)}
+                   className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none hover:scale-110 transition-transform"
+                 />
+               </div>
+             </div>
+
+             <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl hover:border-orange-500/20 transition-all">
+               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Seam Bevels</span>
+               <div className="flex items-center gap-3">
+                 <span className="font-mono text-[10px] text-zinc-500 uppercase">{lipColor}</span>
+                 <input
+                   type="color"
+                   value={lipColor}
+                   onChange={(e) => handleColorChange('lipColor', e.target.value)}
+                   className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none hover:scale-110 transition-transform"
+                 />
+               </div>
+             </div>
            </div>
          </div>
-
-        {/* Color Tuning Panel */}
-        <div className="bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
-          <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/[0.06]">
-            <Palette size={18} className="text-orange-500" />
-            <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Pigment Mapping</h3>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl">
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Base Leather</span>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] text-zinc-500 uppercase">{baseColor}</span>
-                <input
-                  type="color"
-                  value={baseColor}
-                  onChange={(e) => handleColorChange('baseColor', e.target.value)}
-                  className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl">
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Pebble Core</span>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] text-zinc-500 uppercase">{pebbleColor}</span>
-                <input
-                  type="color"
-                  value={pebbleColor}
-                  onChange={(e) => handleColorChange('pebbleColor', e.target.value)}
-                  className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl">
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Rubber Seams</span>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] text-zinc-500 uppercase">{seamColor}</span>
-                <input
-                  type="color"
-                  value={seamColor}
-                  onChange={(e) => handleColorChange('seamColor', e.target.value)}
-                  className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/[0.04] rounded-2xl">
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Seam Bevels</span>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] text-zinc-500 uppercase">{lipColor}</span>
-                <input
-                  type="color"
-                  value={lipColor}
-                  onChange={(e) => handleColorChange('lipColor', e.target.value)}
-                  className="w-8 h-8 rounded-full bg-transparent border-none appearance-none cursor-pointer outline-none"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
 
       </div>
 
@@ -519,14 +519,14 @@ export default function CustomLab() {
 
         {/* Real-time Material HUD Overlay */}
         <div
-          className="bg-gradient-to-t from-black/80 to-black/40 backdrop-blur-md border border-white/[0.08] rounded-[2rem] p-5 w-full max-w-sm mx-auto flex flex-col gap-4 shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+          className="bg-gradient-to-t from-black/90 to-neutral-950/70 backdrop-blur-md border border-orange-500/20 rounded-[2rem] p-5 w-full max-w-sm mx-auto flex flex-col gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.7)] hover:border-orange-500/40 transition-all duration-300"
           role="region"
           aria-label="Live Material HUD"
           aria-describedby={liveHudIdRef.current}
         >
            <div className="flex justify-between items-center pb-3 border-b border-white/[0.06]">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><Activity size={12} className="text-orange-500" /> Live Material HUD</span>
-              <span className="text-[9px] text-zinc-500 font-mono font-bold">{selectedPreset}</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 font-mono"><Activity size={12} className="text-orange-500 animate-pulse" /> Live Material HUD</span>
+              <span className="text-[9px] text-[#d4f82a] font-mono font-black uppercase tracking-wider">{selectedPreset}</span>
            </div>
            <p id={liveHudIdRef.current} className="sr-only">Updates as you change colors and sliders.</p>
            
@@ -567,10 +567,10 @@ export default function CustomLab() {
       {/* RIGHT COLUMN: Sliders */}
       <div className="w-full md:w-[400px] flex-shrink-0 space-y-6 pointer-events-auto">
         
-        <div className="bg-gradient-to-bl from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)] min-h-[300px]">
+        <div className="bg-gradient-to-br from-[#121214] to-[#0a0a0b] border border-orange-500/10 p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:border-orange-500/20 transition-all duration-300 min-h-[300px]">
           <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/[0.06]">
             <Maximize size={18} className="text-orange-500" />
-            <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Physicality Modifiers</h3>
+            <h3 className="font-display text-white text-sm font-black uppercase tracking-widest font-mono">Physicality Modifiers</h3>
           </div>
 
           <div className="space-y-6 pt-2">
@@ -695,10 +695,10 @@ export default function CustomLab() {
         </div>
 
         {/* Stage Lighting Panel */}
-        <div className="bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 backdrop-blur-xl border border-white/[0.08] p-6 rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+        <div className="bg-gradient-to-br from-[#121214] to-[#0a0a0b] border border-orange-500/10 p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.6)] hover:border-orange-500/20 transition-all duration-300">
           <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/[0.06]">
             <Sun size={18} className="text-orange-500 animate-pulse" />
-            <h3 className="font-display text-white text-base font-bold uppercase tracking-widest">Stage Lumens</h3>
+            <h3 className="font-display text-white text-sm font-black uppercase tracking-widest font-mono">Stage Lumens</h3>
           </div>
 
           <div className="space-y-4">

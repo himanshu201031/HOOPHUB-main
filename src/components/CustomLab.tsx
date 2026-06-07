@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Target, Contrast, RotateCcw, BoxSelect, Maximize, Orbit, Palette, Zap, Activity, Sun, SunDim, Save, Download, Upload, Shuffle } from 'lucide-react';
+import { Target, Contrast, RotateCcw, BoxSelect, Maximize, Orbit, Palette, Zap, Activity, Sun, SunDim, Save, Download, Upload, Shuffle, Copy, Share2 } from 'lucide-react';
 import { playMetallicClick, playSwoosh } from '../utils/audio';
+
+interface ExportConfig {
+  preset: string;
+  tactility: string;
+  colors: { baseColor: string; pebbleColor: string; seamColor: string; lipColor: string; };
+  modifiers: { bumpScale: number; roughness: number; metalness: number; autoSpinY: number; ballScaleMultiplier: number; };
+  lighting: { dirLight1Enabled: boolean; dirLight1Intensity: number; dirLight2Enabled: boolean; dirLight2Intensity: number; ambientLightIntensity: number; };
+}
 
 
 
@@ -110,6 +118,113 @@ export default function CustomLab() {
 
   const SIGNATURE_SPINS = ['The Corkscrew', 'Reverse Backspin', 'Top Rock Wobble', 'Gravity Drop'];
   const [spinIdx, setSpinIdx] = useState(0);
+  const [showCopied, setShowCopied] = useState(false);
+
+  const generateRandomColor = useCallback(() => {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = Math.floor(Math.random() * 30) + 60;
+    const lightness = Math.floor(Math.random() * 20) + 40;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }, []);
+
+  const handleRandomize = () => {
+    playSwoosh();
+    setSelectedPreset('Custom');
+    const newBase = generateRandomColor();
+    const newPebble = generateRandomColor();
+    const newSeam = Math.random() > 0.5 ? '#000000' : '#ffffff';
+    const newLip = generateRandomColor();
+    const newMetalness = parseFloat((Math.random() * 0.9).toFixed(2));
+    
+    setBaseColor(newBase);
+    setPebbleColor(newPebble);
+    setSeamColor(newSeam);
+    setLipColor(newLip);
+    setBumpScale(parseFloat((Math.random() * 0.15 + 0.02).toFixed(3)));
+    setRoughness(parseFloat((Math.random() * 0.7 + 0.2).toFixed(2)));
+    setMetalness(newMetalness);
+    setAutoSpinY(parseFloat((Math.random() * 0.007).toFixed(4)));
+    setBallScaleMultiplier(parseFloat((Math.random() * 1.4 + 0.5).toFixed(2)));
+    updateCustomization({ baseColor: newBase, pebbleColor: newPebble, seamColor: newSeam, lipColor: newLip, metalness: newMetalness });
+  };
+
+  const handleExport = () => {
+    playMetallicClick();
+    const config: ExportConfig = {
+      preset: selectedPreset,
+      tactility: selectedTactility,
+      colors: { baseColor, pebbleColor, seamColor, lipColor },
+      modifiers: { bumpScale, roughness, metalness, autoSpinY, ballScaleMultiplier },
+      lighting: { dirLight1Enabled, dirLight1Intensity, dirLight2Enabled, dirLight2Intensity, ambientLightIntensity }
+    };
+    const json = JSON.stringify(config, null, 2);
+    navigator.clipboard.writeText(json).then(() => {
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 2000);
+    });
+  };
+
+  const handleImport = () => {
+    playMetallicClick();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const config: ExportConfig = JSON.parse(event.target?.result as string);
+            setSelectedPreset(config.preset || 'Custom');
+            setSelectedTactility(config.tactility || 'Custom');
+            if (config.colors) {
+              setBaseColor(config.colors.baseColor);
+              setPebbleColor(config.colors.pebbleColor);
+              setSeamColor(config.colors.seamColor);
+              setLipColor(config.colors.lipColor);
+            }
+            if (config.modifiers) {
+              setBumpScale(config.modifiers.bumpScale);
+              setRoughness(config.modifiers.roughness);
+              setMetalness(config.modifiers.metalness);
+              setAutoSpinY(config.modifiers.autoSpinY);
+              setBallScaleMultiplier(config.modifiers.ballScaleMultiplier);
+            }
+            if (config.lighting) {
+              setDirLight1Enabled(config.lighting.dirLight1Enabled);
+              setDirLight1Intensity(config.lighting.dirLight1Intensity);
+              setDirLight2Enabled(config.lighting.dirLight2Enabled);
+              setDirLight2Intensity(config.lighting.dirLight2Intensity);
+              setAmbientLightIntensity(config.lighting.ambientLightIntensity);
+            }
+            updateCustomization(config.colors || {});
+          } catch (err) {
+            console.error('Failed to import config', err);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
+  const handleShare = () => {
+    playMetallicClick();
+    const config: ExportConfig = {
+      preset: selectedPreset,
+      tactility: selectedTactility,
+      colors: { baseColor, pebbleColor, seamColor, lipColor },
+      modifiers: { bumpScale, roughness, metalness, autoSpinY, ballScaleMultiplier },
+      lighting: { dirLight1Enabled, dirLight1Intensity, dirLight2Enabled, dirLight2Intensity, ambientLightIntensity }
+    };
+    const encoded = btoa(JSON.stringify(config));
+    const url = `${window.location.origin}${window.location.pathname}#custom-lab&share=${encoded}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 2000);
+    });
+  };
 
   const updateLighting = useCallback((config: {
     dirLight1Enabled?: boolean;

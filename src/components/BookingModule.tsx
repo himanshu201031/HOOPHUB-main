@@ -337,6 +337,41 @@ export default function BookingModule() {
             </div>
           </div>
 
+          {/* Amenity Filter Checklist */}
+          <div className="flex flex-wrap gap-2 pt-1 pb-1">
+            <span className="text-[9px] text-zinc-500 font-mono uppercase tracking-wider self-center mr-1">Amenities:</span>
+            <button
+              onClick={() => { playMetallicClick(); setFilterParking(!filterParking); }}
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                filterParking
+                  ? 'bg-orange-600/10 text-orange-400 border-orange-500/30 font-black'
+                  : 'bg-[#0c0c0c] text-zinc-400 border-white/5 hover:border-white/20'
+              }`}
+            >
+              🚗 Parking
+            </button>
+            <button
+              onClick={() => { playMetallicClick(); setFilterShowers(!filterShowers); }}
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                filterShowers
+                  ? 'bg-orange-600/10 text-orange-400 border-orange-500/30 font-black'
+                  : 'bg-[#0c0c0c] text-zinc-400 border-white/5 hover:border-white/20'
+              }`}
+            >
+              🚿 Showers
+            </button>
+            <button
+              onClick={() => { playMetallicClick(); setFilterLockers(!filterLockers); }}
+              className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border transition-all cursor-pointer ${
+                filterLockers
+                  ? 'bg-orange-600/10 text-orange-400 border-orange-500/30 font-black'
+                  : 'bg-[#0c0c0c] text-zinc-400 border-white/5 hover:border-white/20'
+              }`}
+            >
+              🔒 Lockers
+            </button>
+          </div>
+
           {/* Court cards vertical listings */}
           <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 select-none scrollbar-thin">
             {filteredCourts.map(court => {

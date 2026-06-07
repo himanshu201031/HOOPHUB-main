@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, ShieldAlert, Sun, CloudRain, Thermometer, Users, Calendar, Clock, IndianRupee, CheckCircle, Navigation, QrCode, Sparkles, Tag, Star, Activity, Info, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { MapPin, ShieldAlert, Sun, CloudRain, Thermometer, Users, Calendar, Clock, IndianRupee, CheckCircle, Navigation, QrCode, Sparkles, Tag, Star, Activity, Info, AlertCircle, Check, X, MessageSquare, Trash, Ticket, HelpCircle } from 'lucide-react';
 import { playMetallicClick, playSwoosh } from '../utils/audio';
 
 export interface Court {
@@ -15,6 +15,18 @@ export interface Court {
   peakPrice: number;
   image: string;
   desc: string;
+  hasParking?: boolean;
+  hasShowers?: boolean;
+  hasLockers?: boolean;
+}
+
+interface CourtReview {
+  id: string;
+  courtId: string;
+  user: string;
+  rating: number;
+  text: string;
+  time: string;
 }
 
 const COURTS_DATA: Court[] = [
@@ -30,7 +42,10 @@ const COURTS_DATA: Court[] = [
     basePrice: 2500,
     peakPrice: 3200,
     image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80',
-    desc: 'Meticulously maintained double-polished North American Maple hardwood. Electronic scoreboard and spectator deck.'
+    desc: 'Meticulously maintained double-polished North American Maple hardwood. Electronic scoreboard and spectator deck.',
+    hasParking: true,
+    hasShowers: true,
+    hasLockers: true
   },
   {
     id: 'c-kamo',
@@ -44,7 +59,10 @@ const COURTS_DATA: Court[] = [
     basePrice: 1200,
     peakPrice: 1800,
     image: 'https://images.unsplash.com/photo-1519766304817-4f37bda74a27?w=600&q=80',
-    desc: 'High-friction polymer acrylic coating. Atmospheric ocean breezes with powerful night floodlight setup.'
+    desc: 'High-friction polymer acrylic coating. Atmospheric ocean breezes with powerful night floodlight setup.',
+    hasParking: true,
+    hasShowers: false,
+    hasLockers: false
   },
   {
     id: 'c-sakura',
@@ -58,7 +76,10 @@ const COURTS_DATA: Court[] = [
     basePrice: 800,
     peakPrice: 1100,
     image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=600&q=80',
-    desc: 'Rugged classic urban concrete court surrounded by gorgeous local park walkways. Best for pure streetball grit.'
+    desc: 'Rugged classic urban concrete court surrounded by gorgeous local park walkways. Best for pure streetball grit.',
+    hasParking: false,
+    hasShowers: false,
+    hasLockers: false
   },
   {
     id: 'c-cyber',
@@ -72,8 +93,18 @@ const COURTS_DATA: Court[] = [
     basePrice: 3000,
     peakPrice: 3800,
     image: 'https://images.unsplash.com/photo-1544698310-74ea9d1c8258?w=600&q=80',
-    desc: 'Futuristic shock-absorbing composite rubber turf with animated floor markings, full AC, and customized high-tempo playback.'
+    desc: 'Futuristic shock-absorbing composite rubber turf with animated floor markings, full AC, and customized high-tempo playback.',
+    hasParking: true,
+    hasShowers: true,
+    hasLockers: true
   }
+];
+
+const INITIAL_REVIEWS: CourtReview[] = [
+  { id: 'r-1', courtId: 'c-shoten', user: 'Rohan_PG', rating: 5, text: 'The Maple wood has an incredible grip! Best court in town.', time: '2 days ago' },
+  { id: 'r-2', courtId: 'c-shoten', user: 'Karan_C', rating: 4, text: 'AC is chilling, worth every rupee.', time: '1 week ago' },
+  { id: 'r-3', courtId: 'c-kamo', user: 'StreetKing_M', rating: 5, text: 'Night sessions under the floodlights with ocean breeze are pure magic.', time: '3 days ago' },
+  { id: 'r-4', courtId: 'c-cyber', user: 'TechBaller', rating: 5, text: 'Smart-turf animations are insane! Felt like playing in 2050.', time: '4 days ago' }
 ];
 
 type WeatherState = 'perfect' | 'rainy' | 'heatwave';
@@ -94,6 +125,37 @@ export default function BookingModule() {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Enhanced states
+  const [reviews, setReviews] = useState<CourtReview[]>([]);
+  const [newReviewUser, setNewReviewUser] = useState<string>('');
+  const [newReviewText, setNewReviewText] = useState<string>('');
+  const [newReviewRating, setNewReviewRating] = useState<number>(5);
+
+  const [promoCodeInput, setPromoCodeInput] = useState<string>('');
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [promoError, setPromoError] = useState<string | null>(null);
+
+  // Amenity filters
+  const [filterParking, setFilterParking] = useState<boolean>(false);
+  const [filterShowers, setFilterShowers] = useState<boolean>(false);
+  const [filterLockers, setFilterLockers] = useState<boolean>(false);
+
+  // Load reviews from localStorage
+  useEffect(() => {
+    try {
+      const storedReviews = localStorage.getItem('y68_court_reviews');
+      if (storedReviews) {
+        setReviews(JSON.parse(storedReviews));
+      } else {
+        setReviews(INITIAL_REVIEWS);
+        localStorage.setItem('y68_court_reviews', JSON.stringify(INITIAL_REVIEWS));
+      }
+    } catch (e) {
+      console.warn("Error loading reviews", e);
+    }
+  }, []);
+
   const handleSelectCourt = (court: Court) => {
     playMetallicClick();
     setSelectedCourt(court);
@@ -113,7 +175,64 @@ export default function BookingModule() {
       price = Math.round(price * 1.15);
     }
 
+    if (discountPercent > 0) {
+      price = Math.round(price * (1 - discountPercent / 100));
+    }
+
     return price;
+  };
+
+  const handleApplyPromo = (e: React.FormEvent) => {
+    e.preventDefault();
+    playMetallicClick();
+    const code = promoCodeInput.trim().toUpperCase();
+    if (code === 'HOOPHUB20') {
+      setDiscountPercent(20);
+      setAppliedPromo(code);
+      setPromoError(null);
+    } else if (code === 'STREET30') {
+      setDiscountPercent(30);
+      setAppliedPromo(code);
+      setPromoError(null);
+    } else if (code === 'MONSOON50') {
+      setDiscountPercent(50);
+      setAppliedPromo(code);
+      setPromoError(null);
+    } else {
+      setPromoError("Invalid discount coupon.");
+    }
+    setPromoCodeInput('');
+  };
+
+  const handleRemovePromo = () => {
+    playMetallicClick();
+    setDiscountPercent(0);
+    setAppliedPromo(null);
+    setPromoError(null);
+  };
+
+  const handleAddReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReviewText.trim() || !newReviewUser.trim()) return;
+    playSwoosh();
+
+    const newRev: CourtReview = {
+      id: `rev-${Date.now()}`,
+      courtId: selectedCourt.id,
+      user: newReviewUser.trim(),
+      rating: newReviewRating,
+      text: newReviewText.trim(),
+      time: 'Just now'
+    };
+
+    const updated = [newRev, ...reviews];
+    setReviews(updated);
+    localStorage.setItem('y68_court_reviews', JSON.stringify(updated));
+
+    // Clear form
+    setNewReviewUser('');
+    setNewReviewText('');
+    setNewReviewRating(5);
   };
 
   const handleBookSlot = (e: React.FormEvent) => {

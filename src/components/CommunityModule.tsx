@@ -910,18 +910,219 @@ export default function CommunityModule() {
           </form>
         </div>
 
+        {/* SUCCESS TOAST MESSAGE */}
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-[100] px-4 py-3 rounded-xl bg-[#0e0e0e] border border-orange-500/40 text-orange-400 font-mono text-xs font-bold shadow-[0_20px_50px_rgba(234,88,12,0.15)] flex items-center gap-2 animate-bounce">
+            <Sparkles size={14} className="text-orange-500" />
+            {toastMessage}
+          </div>
+        )}
+
+        {/* PLAYGROUND PICKUP RUNS SCHEDULER */}
+        <div className="bg-gradient-to-br from-neutral-900 to-[#0e0e0e] border border-white/[0.08] rounded-3xl p-6 text-left space-y-4 shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center justify-between pb-3 border-b border-white/5">
+            <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-widest leading-none font-mono">
+              <Flame size={12} className="text-orange-500 animate-pulse" /> Live Playground Runs
+            </span>
+            <button
+              onClick={() => { playMetallicClick(); setIsCreatingRun(!isCreatingRun); }}
+              className="text-[9px] font-bold text-white bg-orange-600 hover:bg-orange-500 px-2.5 py-1.5 rounded-lg uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <Plus size={10} /> {isCreatingRun ? 'Hide Form' : 'Schedule Run'}
+            </button>
+          </div>
+
+          {isCreatingRun ? (
+            <form onSubmit={handleCreatePickupRun} className="space-y-3 p-3.5 bg-black/40 border border-white/5 rounded-2xl text-xs">
+              <span className="text-[8px] font-bold text-orange-400 uppercase tracking-widest block font-mono">Schedule New Pick-up Run</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[8px] text-zinc-500 uppercase font-mono">Select Court</label>
+                  <select
+                    value={newRunCourt}
+                    onChange={(e) => setNewRunCourt(e.target.value)}
+                    className="bg-[#0c0c0c] border border-white/10 rounded-lg p-1.5 text-[11px] text-white outline-none cursor-pointer font-bold"
+                  >
+                    {hotspots.map(h => <option key={h.id} value={h.name}>{h.name}</option>)}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[8px] text-zinc-500 uppercase font-mono">Game Format</label>
+                  <select
+                    value={newRunType}
+                    onChange={(e) => setNewRunType(e.target.value)}
+                    className="bg-[#0c0c0c] border border-white/10 rounded-lg p-1.5 text-[11px] text-white outline-none cursor-pointer font-bold"
+                  >
+                    <option value="3v3 Halfcourt">3v3 Halfcourt</option>
+                    <option value="5v5 Fullcourt">5v5 Fullcourt</option>
+                    <option value="1v1 King of Court">1v1 King of Court</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[8px] text-zinc-500 uppercase font-mono">Date / Time</label>
+                  <input
+                    type="text"
+                    required
+                    value={newRunTime}
+                    onChange={(e) => setNewRunTime(e.target.value)}
+                    className="bg-[#0c0c0c] border border-white/10 rounded-lg p-1.5 text-[11px] text-white outline-none font-medium"
+                    placeholder="Today, 8:30 PM"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[8px] text-zinc-500 uppercase font-mono">Max Player Slots</label>
+                  <select
+                    value={newRunMaxPlayers}
+                    onChange={(e) => setNewRunMaxPlayers(parseInt(e.target.value))}
+                    className="bg-[#0c0c0c] border border-white/10 rounded-lg p-1.5 text-[11px] text-white outline-none cursor-pointer font-bold"
+                  >
+                    <option value="6">6 Players (Halfcourt)</option>
+                    <option value="10">10 Players (Fullcourt)</option>
+                    <option value="2">2 Players (1v1 Match)</option>
+                    <option value="12">12 Players (Extended)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-1 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingRun(false)}
+                  className="px-2.5 py-1.5 border border-white/10 hover:bg-white/5 rounded-lg text-zinc-400 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white font-extrabold uppercase rounded-lg shadow-lg"
+                >
+                  Publish Run
+                </button>
+              </div>
+            </form>
+          ) : (
+            <p className="text-[9.5px] text-zinc-500 leading-normal font-sans font-normal">
+              Browse current open-court matchups or create one. Jump in to book your spot in the lineup!
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {pickupRuns.map(run => {
+              const isJoined = run.joinedPlayers.includes(profile.name);
+              const spotsLeft = run.maxPlayers - run.joinedPlayers.length;
+              return (
+                <div key={run.id} className="p-3.5 bg-[#090909] border border-white/[0.03] rounded-2xl flex flex-col justify-between space-y-3 hover:border-white/10 transition-colors">
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-start gap-1">
+                      <span className="font-display font-bold uppercase text-[11.5px] text-white truncate">{run.court}</span>
+                      <span className="shrink-0 text-[7.5px] font-mono font-black px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/10 uppercase">
+                        {run.gameType.split(' ')[0]}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[9px] text-zinc-500 font-mono">
+                      <Calendar size={10} className="text-orange-500" />
+                      <span>{run.time}</span>
+                    </div>
+                    <div className="text-[9.5px] text-zinc-400">
+                      Host: <span className="text-white font-medium">@{run.host}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-2 border-t border-white/[0.03]">
+                    <div className="flex justify-between text-[8.5px] font-mono text-zinc-500 uppercase">
+                      <span>Lineup slots filled:</span>
+                      <span className="text-orange-400 font-bold">{run.joinedPlayers.length}/{run.maxPlayers}</span>
+                    </div>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-orange-600 to-amber-400 transition-all" style={{ width: `${(run.joinedPlayers.length / run.maxPlayers) * 100}%` }} />
+                    </div>
+                    <div className="flex items-center justify-between gap-2.5 pt-1">
+                      <div className="flex -space-x-1.5 overflow-hidden shrink-0">
+                        {run.joinedPlayers.slice(0, 4).map((p, pIdx) => (
+                          <div key={pIdx} className="w-5 h-5 rounded-full bg-neutral-800 border border-[#090909] flex items-center justify-center text-[8.5px] font-bold text-orange-400 uppercase font-mono" title={p}>
+                            {p[0]}
+                          </div>
+                        ))}
+                        {run.joinedPlayers.length > 4 && (
+                          <div className="w-5 h-5 rounded-full bg-orange-950 border border-[#090909] flex items-center justify-center text-[7.5px] font-bold text-orange-400 font-mono">
+                            +{run.joinedPlayers.length - 4}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleJoinLeavePickupRun(run.id)}
+                        className={`flex-grow py-1 cursor-pointer rounded-lg text-[9px] font-extrabold uppercase tracking-widest text-center transition-all ${
+                          isJoined
+                            ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/40'
+                            : spotsLeft <= 0
+                            ? 'bg-neutral-900 text-zinc-600 border border-transparent cursor-not-allowed'
+                            : 'bg-white hover:bg-zinc-200 text-black'
+                        }`}
+                        disabled={spotsLeft <= 0 && !isJoined}
+                      >
+                        {isJoined ? '✓ In Lineup' : spotsLeft <= 0 ? 'Fully Stacked' : 'Join Run'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* FEED SEARCH & FILTER BAR */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0c0c0c] border border-white/[0.06] p-4 rounded-3xl shadow-md">
+          <div className="relative w-full sm:w-auto">
+            <Search size={11} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Filter dispatch feed…"
+              value={feedSearch}
+              onChange={(e) => setFeedSearch(e.target.value)}
+              className="pl-8 pr-8 py-1.5 bg-neutral-900 border border-white/5 rounded-xl text-[10px] text-white placeholder:text-zinc-600 outline-none focus:border-orange-500/40 font-mono w-full sm:w-56 transition-colors"
+            />
+            {feedSearch && (
+              <button onClick={() => setFeedSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
+                <X size={10} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-none">
+            {([
+              { key: 'all', label: 'All Feed' },
+              { key: 'status', label: 'Status' },
+              { key: 'highlight', label: 'Highlights' },
+              { key: 'notice', label: 'Notices' }
+            ] as const).map(cat => (
+              <button
+                key={cat.key}
+                onClick={() => { playMetallicClick(); setFeedCategoryFilter(cat.key); }}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider cursor-pointer transition-colors shrink-0 ${
+                  feedCategoryFilter === cat.key 
+                    ? 'bg-orange-600 text-white font-black' 
+                    : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-neutral-900'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* FEED BULLETIN TIMELINE CARDS */}
         <div className="space-y-4">
           <span className="text-[10px] text-zinc-400 font-extrabold tracking-widest block font-mono uppercase bg-white/[0.01] p-2 rounded-lg border border-white/5">
-            📰 PLAYGROUND DISPATCH FEED ({posts.length})
+            📰 PLAYGROUND DISPATCH FEED ({filteredPosts.length}/{posts.length})
           </span>
 
-          {posts.length === 0 ? (
+          {filteredPosts.length === 0 ? (
             <div className="p-12 text-center text-zinc-500 font-medium text-xs border border-white/5 bg-neutral-950 rounded-2xl">
-              No bulletins active on local channel currently. Be first to transmit!
+              No bulletins match your filter on local channel. Be first to transmit!
             </div>
           ) : (
-            posts.map(post => {
+            filteredPosts.map(post => {
               return (
                 <div 
                   key={post.id}
